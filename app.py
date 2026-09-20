@@ -42,32 +42,54 @@ except Exception:
 hero_stats = get_stats()
 
 st.markdown(f"""
-    <div class="hero-wrap">
-        <div class="hero-eyebrow">
-            <span class="hero-eyebrow-dot"></span>
-            BUILT BY STUDENTS · DEPLOYED TO PRODUCTION
-        </div>
-        <h1 class="hero-headline">
-            AI that sees <em>what<br>tired eyes miss.</em>
-        </h1>
-        <p class="hero-sub">
-            SCANOVA AI analyzes X-rays, MRIs, and CT scans in seconds —
-            flagging potentially unusual regions with medical-grade heatmaps.
-            <strong>Not a replacement for radiologists. A second pair of eyes.</strong>
-        </p>
-        <div class="hero-ctas">
-            <a href="#upload" class="cta-primary">Analyze a scan →</a>
-            <a href="/About" target="_self" class="cta-secondary">Read our story</a>
-        </div>
-        <div class="trust-strip">
-            <span class="trust-item"><strong>Python</strong></span>
-            <span class="trust-item"><strong>OpenCV</strong></span>
-            <span class="trust-item"><strong>Streamlit</strong></span>
-            <span class="trust-item">MIT Licensed</span>
-            <span class="trust-item">v3.0 · InnoEx 2026</span>
-        </div>
-    </div>
+<div class="hero-wrap">
+<div class="hero-eyebrow"><span class="hero-eyebrow-dot"></span>BUILT BY STUDENTS · DEPLOYED TO PRODUCTION</div>
+<h1 class="hero-headline">AI that sees <em>what<br>tired eyes miss.</em></h1>
+<p class="hero-sub">SCANOVA AI analyzes X-rays, MRIs, and CT scans in seconds — flagging potentially unusual regions with medical-grade heatmaps. <strong>Not a replacement for radiologists. A second pair of eyes.</strong></p>
+<div class="hero-ctas"><a href="#upload" class="cta-primary">Analyze a scan →</a><a href="/About" target="_self" class="cta-secondary">Read our story</a></div>
+<div class="trust-strip"><span class="trust-item"><strong>Python</strong></span><span class="trust-item"><strong>OpenCV</strong></span><span class="trust-item"><strong>Streamlit</strong></span><span class="trust-item">MIT Licensed</span><span class="trust-item">v3.0 · InnoEx 2026</span></div>
+</div>
 """, unsafe_allow_html=True)
+
+
+# ==========================================================
+# WHAT IT READS — Premium dark modality section
+# ==========================================================
+st.markdown(
+    '<div class="modality-section">'
+    '<div class="modality-eyebrow">SUPPORTED MODALITIES</div>'
+    '<h2 class="modality-title">One tool. <em>Four scan types.</em></h2>'
+    '<p class="modality-desc">SCANOVA handles the most common imaging formats in seconds. Best results with clear, well-centered scans.</p>'
+    '</div>',
+    unsafe_allow_html=True
+)
+
+mod_col1, mod_col2, mod_col3, mod_col4 = st.columns(4)
+
+cards = [
+    ("c1", "01 / 04", "🩻", "Chest X-rays",
+     "Frontal views, PA/AP projections. Detects density variations and unusual regions in lung fields."),
+    ("c2", "02 / 04", "🧠", "Brain MRI",
+     "T1 / T2 axial slices. Flags asymmetric regions and abnormal signal intensity patterns."),
+    ("c3", "03 / 04", "🫁", "Chest CT",
+     "Axial slices. Highlights structural irregularities in lung parenchyma and mediastinum."),
+    ("c4", "04 / 04", "🦴", "Bone Scans",
+     "Long-bone and joint views. Surfaces density discontinuities that may warrant review."),
+]
+
+for col, (cls, num, icon, title, desc) in zip(
+    [mod_col1, mod_col2, mod_col3, mod_col4], cards
+):
+    with col:
+        st.markdown(
+            f'<div class="modality-card {cls}">'
+            f'<span class="modality-card-number">{num}</span>'
+            f'<span class="modality-card-icon">{icon}</span>'
+            f'<h3 class="modality-card-title">{title}</h3>'
+            f'<p class="modality-card-desc">{desc}</p>'
+            f'</div>',
+            unsafe_allow_html=True
+        )
 
 
 # ---------- Disclaimer + Live Stats Row ----------
@@ -81,27 +103,13 @@ with col_left:
 
 with col_right:
     st.markdown(f"""
-        <div class="live-card">
-            <div class="live-card-header">
-                <span class="live-card-title">Live Session</span>
-                <span class="live-pulse">Active</span>
-            </div>
-            <div class="live-stat-row">
-                <span class="live-stat-label">Scans this session</span>
-                <span class="live-stat-value accent">{hero_stats['total']}</span>
-            </div>
-            <div class="live-stat-row">
-                <span class="live-stat-label">Avg analysis time</span>
-                <span class="live-stat-value">{hero_stats['avg_time']}s</span>
-            </div>
-            <div class="live-stat-row">
-                <span class="live-stat-label">Safe / Warn / Danger</span>
-                <span class="live-stat-value" style="font-size: 1rem;">
-                    {hero_stats['safe']} / {hero_stats['warning']} / {hero_stats['danger']}
-                </span>
-            </div>
-        </div>
-    """, unsafe_allow_html=True)
+<div class="live-card">
+<div class="live-card-header"><span class="live-card-title">Live Session</span><span class="live-pulse">Active</span></div>
+<div class="live-stat-row"><span class="live-stat-label">Scans this session</span><span class="live-stat-value accent">{hero_stats['total']}</span></div>
+<div class="live-stat-row"><span class="live-stat-label">Avg analysis time</span><span class="live-stat-value">{hero_stats['avg_time']}s</span></div>
+<div class="live-stat-row"><span class="live-stat-label">Safe / Warn / Danger</span><span class="live-stat-value" style="font-size: 1rem;">{hero_stats['safe']} / {hero_stats['warning']} / {hero_stats['danger']}</span></div>
+</div>
+""", unsafe_allow_html=True)
 
 
 # ---------- Sidebar ----------
@@ -141,16 +149,15 @@ with st.sidebar:
 
 
 # ---------- Upload Section ----------
-st.markdown("""
-    <a id="upload"></a>
-    <div class="section-header">
-        <span class="section-header-icon">📤</span>
-        <div>
-            <h2 class="section-header-text">Upload Medical Image</h2>
-            <p class="section-header-desc">Supported formats: PNG, JPG, JPEG</p>
-        </div>
-    </div>
-""", unsafe_allow_html=True)
+st.markdown(
+    '<a id="upload"></a>'
+    '<div class="section-header">'
+    '<span class="section-header-icon">📤</span>'
+    '<div><h2 class="section-header-text">Upload Medical Image</h2>'
+    '<p class="section-header-desc">Supported formats: PNG, JPG, JPEG</p></div>'
+    '</div>',
+    unsafe_allow_html=True
+)
 
 
 # ---------- Upload ----------
@@ -242,15 +249,14 @@ if uploaded_file is not None:
     if "original" in st.session_state and st.session_state.original is not None:
         st.divider()
 
-        st.markdown("""
-            <div class="section-header">
-                <span class="section-header-icon">🖼️</span>
-                <div>
-                    <h2 class="section-header-text">Analysis Results</h2>
-                    <p class="section-header-desc">Four views of the AI analysis pipeline</p>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
+        st.markdown(
+            '<div class="section-header">'
+            '<span class="section-header-icon">🖼️</span>'
+            '<div><h2 class="section-header-text">Analysis Results</h2>'
+            '<p class="section-header-desc">Four views of the AI analysis pipeline</p></div>'
+            '</div>',
+            unsafe_allow_html=True
+        )
 
         mobile_view = st.toggle("📱 Mobile View (stack images)", value=False)
 
@@ -279,15 +285,14 @@ if uploaded_file is not None:
         # ---------- Report ----------
         st.divider()
 
-        st.markdown("""
-            <div class="section-header">
-                <span class="section-header-icon">📋</span>
-                <div>
-                    <h2 class="section-header-text">Analysis Report</h2>
-                    <p class="section-header-desc">Summary of detected patterns</p>
-                </div>
-            </div>
-        """, unsafe_allow_html=True)
+        st.markdown(
+            '<div class="section-header">'
+            '<span class="section-header-icon">📋</span>'
+            '<div><h2 class="section-header-text">Analysis Report</h2>'
+            '<p class="section-header-desc">Summary of detected patterns</p></div>'
+            '</div>',
+            unsafe_allow_html=True
+        )
 
         r = st.session_state.report
 
@@ -350,20 +355,20 @@ if uploaded_file is not None:
             with col_dl2:
                 st.warning(f"PDF unavailable: {e}")
 
+
 # ==========================================================
 # FAQ SECTION (compact)
 # ==========================================================
 st.divider()
 
-st.markdown("""
-    <div class="section-header">
-        <span class="section-header-icon">❓</span>
-        <div>
-            <h2 class="section-header-text">Frequently Asked Questions</h2>
-            <p class="section-header-desc">Quick answers. Full FAQ on the dedicated page.</p>
-        </div>
-    </div>
-""", unsafe_allow_html=True)
+st.markdown(
+    '<div class="section-header">'
+    '<span class="section-header-icon">❓</span>'
+    '<div><h2 class="section-header-text">Frequently Asked Questions</h2>'
+    '<p class="section-header-desc">Quick answers. Full FAQ on the dedicated page.</p></div>'
+    '</div>',
+    unsafe_allow_html=True
+)
 
 with st.expander("🩺 Is SCANOVA AI a medical device?"):
     st.markdown(
@@ -396,40 +401,36 @@ st.markdown(
     "📖 **See all 9 questions →** "
     "[Open the full FAQ page](/FAQ)"
 )
+
+
 # ==========================================================
 # FOUNDER QUOTE
 # ==========================================================
-st.markdown("""
-    <div class="founder-quote">
-        "We built SCANOVA because we watched radiologists drown in
-        hundreds of scans a day. AI shouldn't replace them — it should
-        give them back the time to think."
-        <span class="attr">
-            — <strong>Anwesha Rout</strong>, Founder · SCANOVA AI
-        </span>
-    </div>
-""", unsafe_allow_html=True)
+st.markdown(
+    '<div class="founder-quote">'
+    '"We built SCANOVA because we watched radiologists drown in '
+    'hundreds of scans a day. AI shouldn\'t replace them — it should '
+    'give them back the time to think."'
+    '<span class="attr">— <strong>Anwesha Rout</strong>, Founder · SCANOVA AI</span>'
+    '</div>',
+    unsafe_allow_html=True
+)
 
 
 # ==========================================================
 # FOOTER
 # ==========================================================
-st.markdown("""
-    <div class="app-footer">
-        <div class="footer-line">
-            <strong>SCANOVA AI</strong> — Medical Image Analysis Assistant
-        </div>
-        <div class="footer-line">
-            Designed & built by the SCANOVA Team
-        </div>
-        <div>
-            <span class="footer-badge">Python</span>
-            <span class="footer-badge">OpenCV</span>
-            <span class="footer-badge">Streamlit</span>
-            <span class="footer-badge">v3.0</span>
-        </div>
-        <div class="footer-line" style="margin-top: 1rem; font-size: 0.75rem;">
-            ⚠️ Not for clinical use. Always consult a qualified radiologist.
-        </div>
-    </div>
-""", unsafe_allow_html=True)
+st.markdown(
+    '<div class="app-footer">'
+    '<div class="footer-line"><strong>SCANOVA AI</strong> — Medical Image Analysis Assistant</div>'
+    '<div class="footer-line">Designed & built by the SCANOVA Team</div>'
+    '<div>'
+    '<span class="footer-badge">Python</span>'
+    '<span class="footer-badge">OpenCV</span>'
+    '<span class="footer-badge">Streamlit</span>'
+    '<span class="footer-badge">v3.0</span>'
+    '</div>'
+    '<div class="footer-line" style="margin-top: 1rem; font-size: 0.75rem;">⚠️ Not for clinical use. Always consult a qualified radiologist.</div>'
+    '</div>',
+    unsafe_allow_html=True
+)
