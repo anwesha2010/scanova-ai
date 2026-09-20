@@ -32,7 +32,7 @@ with st.sidebar:
 
     sensitivity = st.slider(
         "Detection Sensitivity",
-        min_value=0.3, max_value=0.9, value=0.75, step=0.05
+        min_value=0.3, max_value=0.9, value=0.85, step=0.05
     )
     block_size = st.select_slider(
         "Analysis Block Size",

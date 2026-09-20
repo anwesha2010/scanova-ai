@@ -34,7 +34,7 @@ def detect_anomalies(image, block_size=32):
     return anomaly_map
 
 
-def find_anomaly_regions(anomaly_map, threshold=0.6, min_area=800):
+def find_anomaly_regions(anomaly_map, threshold=0.6, min_area=2500):
     """
     Find bounding boxes around suspicious spots.
     Ignores border noise and small regions.
