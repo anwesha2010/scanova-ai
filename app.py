@@ -2,11 +2,13 @@ import streamlit as st
 from PIL import Image
 import numpy as np
 import io
+import time
 
 from backend.preprocess import preprocess
 from backend.analyzer import detect_anomalies, find_anomaly_regions
 from backend.heatmap import generate_heatmap, draw_boxes
 from backend.report import generate_report
+from utils.analytics import init_analytics, record_scan, get_stats
 
 
 # ---------- Page Setup ----------
@@ -15,6 +17,8 @@ st.set_page_config(
     page_icon="🩻",
     layout="wide"
 )
+
+init_analytics()
 
 
 # ---------- Load Custom CSS ----------
@@ -55,6 +59,16 @@ with st.sidebar:
         options=[16, 32, 64], value=32
     )
     show_boxes = st.checkbox("Show bounding boxes", value=True)
+
+    st.divider()
+    st.markdown("### 📊 Quick Stats")
+    try:
+        stats = get_stats()
+        st.caption(f"Scans this session: **{stats['total']}**")
+        if stats["total"] > 0:
+            st.caption(f"Avg time: **{stats['avg_time']}s**")
+    except Exception:
+        pass
 
     st.divider()
     st.caption("Built with Python • OpenCV • Streamlit")
@@ -111,6 +125,7 @@ if uploaded_file is not None:
 
     if analyze_btn:
         file_bytes = uploaded_file.read()
+        start_time = time.time()
 
         with st.spinner("Analyzing image..."):
             original, enhanced, normalized = preprocess(file_bytes)
@@ -123,12 +138,22 @@ if uploaded_file is not None:
 
             report = generate_report(anomaly_map, regions, threshold=sensitivity)
 
+        analysis_duration = time.time() - start_time
+
         st.session_state.original = original
         st.session_state.processed = enhanced
         st.session_state.heatmap = raw_heat
         st.session_state.overlay = overlay
         st.session_state.regions = regions
         st.session_state.report = report
+
+        record_scan(
+            filename=uploaded_file.name,
+            regions=report["regions_found"],
+            status=report["status"],
+            level=report["level"],
+            duration=analysis_duration
+        )
 
     # ---------- Display Results ----------
     if "original" in st.session_state and st.session_state.original is not None:
