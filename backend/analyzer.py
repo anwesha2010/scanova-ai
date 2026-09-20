@@ -32,12 +32,12 @@ def detect_anomalies(image, block_size=32):
             anomaly_map[i:i+block_size, j:j+block_size] = score
 
     # Strong smoothing to reduce noise
-    anomaly_map = cv2.GaussianBlur(anomaly_map, (25, 25), 0)
+    anomaly_map = cv2.GaussianBlur(anomaly_map, (15, 15), 0)
     anomaly_map = cv2.normalize(anomaly_map, None, 0, 1, cv2.NORM_MINMAX)
     return anomaly_map
 
 
-def find_anomaly_regions(anomaly_map, threshold=0.6, min_area=1500):
+def find_anomaly_regions(anomaly_map, threshold=0.6, min_area=800):
     """
     Find bounding boxes around strong anomalies.
     - Ignores 60-pixel border (X-ray frame)
@@ -62,6 +62,12 @@ def find_anomaly_regions(anomaly_map, threshold=0.6, min_area=1500):
                                     cv2.CHAIN_APPROX_SIMPLE)
 
     # Only keep LARGE regions
-    regions = [cv2.boundingRect(c) for c in contours
+        regions = [cv2.boundingRect(c) for c in contours
                if cv2.contourArea(c) >= min_area]
+    
+    # Filter out the giant box covering too much area
+    img_area = anomaly_map.shape[0] * anomaly_map.shape[1]
+    regions = [r for r in regions 
+               if (r[2] * r[3]) < img_area * 0.15]  # max 15% of image
+    
     return regions

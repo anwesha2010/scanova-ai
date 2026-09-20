@@ -1,11 +1,16 @@
 def generate_report(anomaly_map, regions, threshold=0.6):
     """Create a clean text report."""
-    
-    # Calculate affected area from REGIONS only (not raw pixels)
+
     if regions:
-        region_area = sum(w * h for (_, _, w, h) in regions)
-        total_area = anomaly_map.shape[0] * anomaly_map.shape[1]
-        risk_pct = (region_area / total_area) * 100
+        # Average anomaly strength INSIDE the detected regions
+        total_pixel_score = 0
+        total_pixels = 0
+        for (x, y, w, h) in regions:
+            region_scores = anomaly_map[y:y+h, x:x+w]
+            total_pixel_score += (region_scores > threshold).sum()
+            total_pixels += w * h
+        # Percent of the box that is "anomalous"
+        risk_pct = (total_pixel_score / max(total_pixels, 1)) * 100
     else:
         risk_pct = 0.0
 
