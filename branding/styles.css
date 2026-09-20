@@ -6,28 +6,37 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap');
 
-/* ---------- Kill Streamlit top gap ---------- */
-.main .block-container {
-    padding-top: 1rem !important;
-    padding-bottom: 4rem !important;
+/* ============================================
+   TOP GAP FIX — aggressive
+   ============================================ */
+.main .block-container,
+[data-testid="stAppViewBlockContainer"],
+.block-container {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
     max-width: 1280px;
 }
 
-[data-testid="stAppViewContainer"] > .main {
+[data-testid="stAppViewContainer"] > .main,
+[data-testid="stAppViewContainer"] > .main > div,
+[data-testid="stAppViewContainer"] section,
+[data-testid="stAppViewContainer"] section > div {
     padding-top: 0 !important;
+    margin-top: 0 !important;
 }
 
-[data-testid="stAppViewContainer"] section {
-    padding-top: 0 !important;
-}
-
-[data-testid="stHeader"] {
-    display: none !important;
-}
-
+[data-testid="stHeader"],
 header[data-testid="stHeader"] {
-    background: transparent !important;
+    display: none !important;
     height: 0 !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+.main > div:first-child {
+    margin-top: 0 !important;
+    padding-top: 0 !important;
 }
 
 /* ---------- Base ---------- */
@@ -36,7 +45,6 @@ html, body, [class*="css"] {
     background: #fafafa;
 }
 
-/* Hide Streamlit chrome */
 #MainMenu { visibility: hidden; }
 footer { visibility: hidden; }
 
@@ -44,6 +52,102 @@ footer { visibility: hidden; }
 h1, h2, h3, h4 {
     color: #09090b !important;
     letter-spacing: -0.03em !important;
+}
+
+/* ============================================
+   TOP ANNOUNCEMENT BANNER
+   ============================================ */
+.top-banner {
+    background: linear-gradient(90deg, #09090b 0%, #18181b 50%, #09090b 100%);
+    background-size: 200% 100%;
+    animation: bannerShift 6s ease-in-out infinite;
+    padding: 12px 24px;
+    border-radius: 0;
+    margin: 0 -3rem 1.5rem -3rem;
+    position: relative;
+    overflow: hidden;
+}
+
+@keyframes bannerShift {
+    0%, 100% { background-position: 0% 50%; }
+    50%      { background-position: 100% 50%; }
+}
+
+.top-banner::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background:
+        radial-gradient(circle at 20% 50%, rgba(14, 165, 233, 0.25) 0%, transparent 40%),
+        radial-gradient(circle at 80% 50%, rgba(139, 92, 246, 0.2) 0%, transparent 40%);
+    pointer-events: none;
+}
+
+.top-banner-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    position: relative;
+    z-index: 1;
+    flex-wrap: wrap;
+}
+
+.top-banner-pill {
+    background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
+    color: #ffffff;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    padding: 3px 10px;
+    border-radius: 100px;
+    text-transform: uppercase;
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.5);
+    animation: pillPulse 2s ease-in-out infinite;
+}
+
+@keyframes pillPulse {
+    0%, 100% { box-shadow: 0 0 20px rgba(14, 165, 233, 0.5); }
+    50%      { box-shadow: 0 0 30px rgba(14, 165, 233, 0.9); }
+}
+
+.top-banner-text {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.9rem;
+    color: #a1a1aa;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+}
+
+.top-banner-text strong {
+    color: #fafafa;
+    font-weight: 700;
+}
+
+.gradient-text {
+    background: linear-gradient(90deg, #0ea5e9, #8b5cf6, #ec4899);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: 800;
+    animation: gradientShift 4s linear infinite;
+}
+
+@keyframes gradientShift {
+    0%   { background-position: 0% center; }
+    100% { background-position: 200% center; }
+}
+
+.top-banner-arrow {
+    color: #0ea5e9;
+    font-weight: 700;
+    transition: transform 0.3s ease;
+}
+
+.top-banner:hover .top-banner-arrow {
+    transform: translateX(4px);
 }
 
 /* ============================================
@@ -93,10 +197,7 @@ h1, h2, h3, h4 {
 .hero-image-wrap::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     background:
         linear-gradient(180deg, rgba(14, 165, 233, 0.15) 0%, transparent 40%),
         linear-gradient(0deg, rgba(9, 9, 11, 0.4) 0%, transparent 60%);
@@ -195,7 +296,6 @@ h1, h2, h3, h4 {
     font-style: italic;
     font-weight: 800;
     color: #0ea5e9;
-    font-family: 'Inter', sans-serif;
 }
 
 .hero-sub {
@@ -290,9 +390,8 @@ h1, h2, h3, h4 {
 }
 
 /* ============================================
-   MODALITY SECTION — premium dark grid (compact)
+   MODALITY SECTION — premium dark grid
    ============================================ */
-
 .modality-section {
     background: linear-gradient(135deg, #09090b 0%, #18181b 100%);
     padding: 1.75rem 2.5rem;
@@ -604,8 +703,6 @@ h1, h2, h3, h4 {
 /* ============================================
    STREAMLIT OVERRIDES
    ============================================ */
-
-/* Alert / Disclaimer */
 [data-testid="stAlert"] {
     border-radius: 12px !important;
     background: #fef9c3 !important;
@@ -622,7 +719,6 @@ h1, h2, h3, h4 {
     font-size: 0.95rem !important;
 }
 
-/* Buttons */
 .stButton > button {
     border-radius: 10px !important;
     font-weight: 600 !important;
@@ -669,7 +765,6 @@ h1, h2, h3, h4 {
     box-shadow: 0 6px 16px rgba(14, 165, 233, 0.2) !important;
 }
 
-/* Metric cards */
 [data-testid="stMetric"] {
     background: #ffffff;
     border: 1px solid #e4e4e7;
@@ -701,7 +796,6 @@ h1, h2, h3, h4 {
     text-transform: uppercase !important;
 }
 
-/* Sidebar */
 [data-testid="stSidebar"] {
     background: #ffffff !important;
     border-right: 1px solid #e4e4e7 !important;
@@ -711,14 +805,12 @@ h1, h2, h3, h4 {
     padding-top: 2rem !important;
 }
 
-/* Divider */
 hr {
     margin: 2.5rem 0 !important;
     border: none !important;
     border-top: 1px solid #e4e4e7 !important;
 }
 
-/* Upload zone */
 [data-testid="stFileUploader"] section {
     border: 2px dashed #d4d4d8 !important;
     border-radius: 12px !important;
@@ -731,13 +823,11 @@ hr {
     background: #f8fafc !important;
 }
 
-/* Image containers */
 [data-testid="stImage"] img {
     border-radius: 10px;
     border: 1px solid #e4e4e7;
 }
 
-/* Expanders (FAQ) */
 [data-testid="stExpander"] {
     border: 1px solid #e4e4e7 !important;
     border-radius: 12px !important;
@@ -821,6 +911,17 @@ hr {
 }
 
 @media (max-width: 768px) {
+    .top-banner {
+        margin: 0 -1.5rem 1.5rem -1.5rem;
+        padding: 10px 16px;
+    }
+    .top-banner-text {
+        font-size: 0.78rem;
+    }
+    .top-banner-pill {
+        font-size: 0.6rem;
+        padding: 2px 8px;
+    }
     .modality-section {
         padding: 1.25rem 1.5rem;
         border-radius: 14px;

@@ -37,12 +37,27 @@ except Exception:
     pass
 
 
+# ---------- Top Announcement Banner ----------
+st.markdown(
+    '<div class="top-banner">'
+    '<div class="top-banner-content">'
+    '<span class="top-banner-pill">NEW</span>'
+    '<span class="top-banner-text">'
+    '<span class="gradient-text">Revolutionizing Medical Imaging</span> '
+    'with <strong>AI-Powered X-ray Analysis</strong>'
+    '</span>'
+    '<span class="top-banner-arrow">→</span>'
+    '</div>'
+    '</div>',
+    unsafe_allow_html=True
+)
+
+
 # ==========================================================
 # HERO SECTION — split layout with image
 # ==========================================================
 hero_stats = get_stats()
 
-# Load hero image as base64
 try:
     with open("branding/hero_image.png", "rb") as f:
         hero_img_b64 = base64.b64encode(f.read()).decode()
