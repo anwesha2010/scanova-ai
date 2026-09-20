@@ -350,7 +350,52 @@ if uploaded_file is not None:
             with col_dl2:
                 st.warning(f"PDF unavailable: {e}")
 
+# ==========================================================
+# FAQ SECTION (compact)
+# ==========================================================
+st.divider()
 
+st.markdown("""
+    <div class="section-header">
+        <span class="section-header-icon">❓</span>
+        <div>
+            <h2 class="section-header-text">Frequently Asked Questions</h2>
+            <p class="section-header-desc">Quick answers. Full FAQ on the dedicated page.</p>
+        </div>
+    </div>
+""", unsafe_allow_html=True)
+
+with st.expander("🩺 Is SCANOVA AI a medical device?"):
+    st.markdown(
+        "**No.** SCANOVA AI is an assistive research and educational tool. "
+        "It is not FDA, MCI, or CE-cleared and must not be used for clinical "
+        "decision-making. Always consult a qualified radiologist."
+    )
+
+with st.expander("🧠 How does the AI actually work?"):
+    st.markdown(
+        "Two stages: (1) **Preprocessing** — resize, denoise, contrast-enhance "
+        "via CLAHE. (2) **Anomaly detection** — the image is scanned in blocks; "
+        "regions that deviate from surrounding tissue are flagged. An upcoming "
+        "version will use a PyTorch autoencoder for higher accuracy."
+    )
+
+with st.expander("🔒 Is my data stored?"):
+    st.markdown(
+        "**No.** Images are processed in-memory only. Nothing is saved, "
+        "logged, or shared. Close the tab and it's gone."
+    )
+
+with st.expander("💸 Is it free?"):
+    st.markdown(
+        "**Yes.** MIT-licensed, free forever. No signup, no limits. "
+        "Source code on [GitHub](https://github.com/anwesha2010/scanova-ai)."
+    )
+
+st.markdown(
+    "📖 **See all 9 questions →** "
+    "[Open the full FAQ page](/FAQ)"
+)
 # ==========================================================
 # FOUNDER QUOTE
 # ==========================================================
