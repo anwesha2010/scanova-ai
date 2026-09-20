@@ -3,6 +3,7 @@ from PIL import Image
 import numpy as np
 import io
 import time
+import base64
 
 from backend.preprocess import preprocess
 from backend.analyzer import detect_anomalies, find_anomaly_regions
@@ -37,17 +38,33 @@ except Exception:
 
 
 # ==========================================================
-# HERO SECTION
+# HERO SECTION — split layout with image
 # ==========================================================
 hero_stats = get_stats()
 
+# Load hero image as base64
+try:
+    with open("branding/hero_image.png", "rb") as f:
+        hero_img_b64 = base64.b64encode(f.read()).decode()
+    hero_img_tag = (
+        f'<div class="hero-image-wrap">'
+        f'<img src="data:image/png;base64,{hero_img_b64}" alt="SCANOVA AI hero" />'
+        f'<div class="hero-image-badge">Live scan preview</div>'
+        f'</div>'
+    )
+except FileNotFoundError:
+    hero_img_tag = ""
+
 st.markdown(f"""
-<div class="hero-wrap">
+<div class="hero-split">
+<div class="hero-left">
 <div class="hero-eyebrow"><span class="hero-eyebrow-dot"></span>BUILT BY STUDENTS · DEPLOYED TO PRODUCTION</div>
 <h1 class="hero-headline">AI that sees <em>what<br>tired eyes miss.</em></h1>
 <p class="hero-sub">SCANOVA AI analyzes X-rays, MRIs, and CT scans in seconds — flagging potentially unusual regions with medical-grade heatmaps. <strong>Not a replacement for radiologists. A second pair of eyes.</strong></p>
 <div class="hero-ctas"><a href="#upload" class="cta-primary">Analyze a scan →</a><a href="/About" target="_self" class="cta-secondary">Read our story</a></div>
 <div class="trust-strip"><span class="trust-item"><strong>Python</strong></span><span class="trust-item"><strong>OpenCV</strong></span><span class="trust-item"><strong>Streamlit</strong></span><span class="trust-item">MIT Licensed</span><span class="trust-item">v3.0 · InnoEx 2026</span></div>
+</div>
+<div class="hero-right">{hero_img_tag}</div>
 </div>
 """, unsafe_allow_html=True)
 
