@@ -76,7 +76,9 @@ def generate_pdf_report(report, overlay_img):
     story.append(Paragraph("Detection Overlay", heading_style))
 
     # Convert numpy BGR image to PNG bytes
-    success, buf = cv2.imencode('.png', overlay_img)
+        # Convert BGR to RGB for correct colors in PDF
+    rgb_img = cv2.cvtColor(overlay_img, cv2.COLOR_BGR2RGB)
+    success, buf = cv2.imencode('.png', rgb_img)
     if success:
         img_bytes = io.BytesIO(buf.tobytes())
         rl_img = RLImage(img_bytes, width=4 * inch, height=4 * inch)
