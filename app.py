@@ -45,16 +45,23 @@ with st.sidebar:
 
 # ---------- Upload ----------
 # ---------- Upload ----------
+# ---------- Upload ----------
 st.markdown("### 📤 Upload Medical Image")
+
+# Initialize session state for uploaded file
+if "uploaded_file" not in st.session_state:
+    st.session_state.uploaded_file = None
 
 col1, col2 = st.columns([3, 1])
 
 with col1:
-    uploaded_file = st.file_uploader(
+    uploaded = st.file_uploader(
         "Supported: PNG, JPG, JPEG",
         type=["png", "jpg", "jpeg"],
         label_visibility="collapsed"
     )
+    if uploaded is not None:
+        st.session_state.uploaded_file = uploaded
 
 with col2:
     st.write("")  # small vertical spacing
@@ -69,11 +76,15 @@ if sample_btn:
     try:
         with open("assets/sample_xray.png", "rb") as f:
             sample_bytes = f.read()
-        uploaded_file = io.BytesIO(sample_bytes)
-        uploaded_file.name = "sample_xray.png"
+        sample_io = io.BytesIO(sample_bytes)
+        sample_io.name = "sample_xray.png"
+        st.session_state.uploaded_file = sample_io
+        st.rerun()  # Force re-run so button enables
     except FileNotFoundError:
         st.error("Sample image not found. Please upload your own.")
 
+# Use the session state version
+uploaded_file = st.session_state.uploaded_file
 analyze_btn = st.button(
     "🔍 Analyze Image",
     type="primary",
