@@ -30,31 +30,74 @@ except Exception:
     pass
 
 
-# ---------- HERO ----------
-st.markdown("""
-    <div class="hero-container">
-        <div class="hero-badge">AI-POWERED MEDICAL IMAGING</div>
-        <h1 class="hero-title">SCANOVA AI</h1>
-        <p class="hero-tagline">
-            Upload X-ray, MRI, or CT scans. Our AI identifies potentially 
-            unusual regions and highlights them with medical-grade heatmaps — 
-            faster than manual review.
+# ==========================================================
+# HERO SECTION
+# ==========================================================
+hero_stats = get_stats()
+
+st.markdown(f"""
+    <div class="hero-wrap">
+        <div class="hero-eyebrow">
+            <span class="hero-eyebrow-dot"></span>
+            BUILT BY STUDENTS · DEPLOYED TO PRODUCTION
+        </div>
+        <h1 class="hero-headline">
+            AI that sees <em>what<br>tired eyes miss.</em>
+        </h1>
+        <p class="hero-sub">
+            SCANOVA AI analyzes X-rays, MRIs, and CT scans in seconds —
+            flagging potentially unusual regions with medical-grade heatmaps.
+            <strong>Not a replacement for radiologists. A second pair of eyes.</strong>
         </p>
-        <p class="hero-team">
-            Built by <strong>Anwesha Rout</strong> • 
-            <strong>SCANOVA Team</strong> • v2.0
-        </p>
+        <div class="hero-ctas">
+            <a href="#upload" class="cta-primary">Analyze a scan →</a>
+            <a href="/1_About" target="_self" class="cta-secondary">Read our story</a>
+        </div>
+        <div class="trust-strip">
+            <span class="trust-item"><strong>Python</strong></span>
+            <span class="trust-item"><strong>OpenCV</strong></span>
+            <span class="trust-item"><strong>Streamlit</strong></span>
+            <span class="trust-item">MIT Licensed</span>
+            <span class="trust-item">v3.0 · InnoEx 2026</span>
+        </div>
     </div>
 """, unsafe_allow_html=True)
 
 
-# ---------- Disclaimer ----------
-st.warning(
-    "⚠️ **Assistive tool only.** This does not replace professional medical "
-    "diagnosis. Always consult a qualified radiologist for clinical decisions."
-)
+# ---------- Disclaimer + Live Stats Row ----------
+col_left, col_right = st.columns([3, 1])
 
-st.divider()
+with col_left:
+    st.warning(
+        "⚠️ **Assistive tool only.** This does not replace professional medical "
+        "diagnosis. Always consult a qualified radiologist for clinical decisions."
+    )
+
+with col_right:
+    st.markdown(f"""
+        <div class="live-card">
+            <div class="live-card-header">
+                <span class="live-card-title">Live Session</span>
+                <span class="live-pulse">Active</span>
+            </div>
+            <div class="live-stat-row">
+                <span class="live-stat-label">Scans this session</span>
+                <span class="live-stat-value accent">{hero_stats['total']}</span>
+            </div>
+            <div class="live-stat-row">
+                <span class="live-stat-label">Avg analysis time</span>
+                <span class="live-stat-value">{hero_stats['avg_time']}s</span>
+            </div>
+            <div class="live-stat-row">
+                <span class="live-stat-label">Safe / Warn / Danger</span>
+                <span class="live-stat-value" style="font-size: 1rem;">
+                    {hero_stats['safe']} / {hero_stats['warning']} / {hero_stats['danger']}
+                </span>
+            </div>
+        </div>
+    """, unsafe_allow_html=True)
+
+
 
 
 # ---------- Sidebar ----------
@@ -77,11 +120,15 @@ with st.sidebar:
     st.divider()
     st.markdown("### 📊 Session Stats")
     try:
-        stats = get_stats()
-        st.caption(f"Scans this session: **{stats['total']}**")
-        if stats["total"] > 0:
-            st.caption(f"Avg analysis time: **{stats['avg_time']}s**")
-            st.caption(f"✅ {stats['safe']}  ⚠️ {stats['warning']}  🔴 {stats['danger']}")
+        sidebar_stats = get_stats()
+        st.caption(f"Scans this session: **{sidebar_stats['total']}**")
+        if sidebar_stats["total"] > 0:
+            st.caption(f"Avg analysis time: **{sidebar_stats['avg_time']}s**")
+            st.caption(
+                f"✅ {sidebar_stats['safe']}  "
+                f"⚠️ {sidebar_stats['warning']}  "
+                f"🔴 {sidebar_stats['danger']}"
+            )
     except Exception:
         pass
 
@@ -89,8 +136,9 @@ with st.sidebar:
     st.caption("Python • OpenCV • Streamlit")
 
 
-# ---------- Upload Section Header ----------
+# ---------- Upload Section ----------
 st.markdown("""
+    <a id="upload"></a>
     <div class="section-header">
         <span class="section-header-icon">📤</span>
         <div>
@@ -286,7 +334,24 @@ if uploaded_file is not None:
                 st.warning(f"PDF unavailable: {e}")
 
 
-# ---------- Footer ----------
+# ==========================================================
+# FOUNDER QUOTE
+# ==========================================================
+st.markdown("""
+    <div class="founder-quote">
+        "We built SCANOVA because we watched radiologists drown in
+        hundreds of scans a day. AI shouldn't replace them — it should
+        give them back the time to think."
+        <span class="attr">
+            — <strong>Anwesha Rout</strong>, Founder · SCANOVA AI
+        </span>
+    </div>
+""", unsafe_allow_html=True)
+
+
+# ==========================================================
+# FOOTER
+# ==========================================================
 st.markdown("""
     <div class="app-footer">
         <div class="footer-line">
@@ -299,7 +364,7 @@ st.markdown("""
             <span class="footer-badge">Python</span>
             <span class="footer-badge">OpenCV</span>
             <span class="footer-badge">Streamlit</span>
-            <span class="footer-badge">v2.0</span>
+            <span class="footer-badge">v3.0</span>
         </div>
         <div class="footer-line" style="margin-top: 1rem; font-size: 0.75rem;">
             ⚠️ Not for clinical use. Always consult a qualified radiologist.
