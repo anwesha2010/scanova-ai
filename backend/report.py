@@ -1,8 +1,13 @@
 def generate_report(anomaly_map, regions, threshold=0.6):
-    """Create a simple text report."""
-    high_risk = (anomaly_map > threshold).sum()
-    total = anomaly_map.size
-    risk_pct = (high_risk / total) * 100
+    """Create a clean text report."""
+    
+    # Calculate affected area from REGIONS only (not raw pixels)
+    if regions:
+        region_area = sum(w * h for (_, _, w, h) in regions)
+        total_area = anomaly_map.shape[0] * anomaly_map.shape[1]
+        risk_pct = (region_area / total_area) * 100
+    else:
+        risk_pct = 0.0
 
     if len(regions) == 0:
         status = "✅ No significant unusual regions detected"
