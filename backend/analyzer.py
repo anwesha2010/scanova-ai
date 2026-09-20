@@ -5,14 +5,12 @@ import cv2
 def detect_anomalies(image, block_size=32):
     """
     Detect anomalies using local brightness deviation.
-    Only BRIGHT outliers are flagged (medical abnormalities tend
-    to be brighter or denser than surrounding tissue).
+    Only BRIGHT outliers are flagged.
     """
     img = image.astype(np.float32)
     h, w = img.shape
     anomaly_map = np.zeros_like(img)
 
-    # Global statistics
     global_mean = img.mean()
     global_std = img.std() + 1e-6
 
@@ -21,17 +19,16 @@ def detect_anomalies(image, block_size=32):
             block = img[i:i+block_size, j:j+block_size]
             local_mean = block.mean()
 
-            # Only flag blocks BRIGHTER than average (not darker)
-            # Medical abnormalities = dense tissue = bright spots
+            # Only flag blocks BRIGHTER than average
             diff = local_mean - global_mean
             if diff > 0:
                 score = diff / global_std
             else:
-                score = 0  # ignore dark regions
+                score = 0
 
             anomaly_map[i:i+block_size, j:j+block_size] = score
 
-    # Strong smoothing to reduce noise
+    # Smooth
     anomaly_map = cv2.GaussianBlur(anomaly_map, (15, 15), 0)
     anomaly_map = cv2.normalize(anomaly_map, None, 0, 1, cv2.NORM_MINMAX)
     return anomaly_map
@@ -39,13 +36,12 @@ def detect_anomalies(image, block_size=32):
 
 def find_anomaly_regions(anomaly_map, threshold=0.6, min_area=800):
     """
-    Find bounding boxes around strong anomalies.
-    - Ignores 60-pixel border (X-ray frame)
-    - Only keeps LARGE regions (min 1500 pixels)
+    Find bounding boxes around suspicious spots.
+    Ignores border noise and small regions.
     """
     h, w = anomaly_map.shape
 
-    # Ignore the border (top, bottom, left, right)
+    # Ignore the border
     border = 60
     masked = anomaly_map.copy()
     masked[:border, :] = 0
@@ -61,13 +57,12 @@ def find_anomaly_regions(anomaly_map, threshold=0.6, min_area=800):
     contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL,
                                     cv2.CHAIN_APPROX_SIMPLE)
 
-    # Only keep LARGE regions
-        regions = [cv2.boundingRect(c) for c in contours
+    regions = [cv2.boundingRect(c) for c in contours
                if cv2.contourArea(c) >= min_area]
-    
-    # Filter out the giant box covering too much area
-    img_area = anomaly_map.shape[0] * anomaly_map.shape[1]
-    regions = [r for r in regions 
-               if (r[2] * r[3]) < img_area * 0.15]  # max 15% of image
-    
+
+    # Filter out giant boxes (over 15% of image)
+    img_area = h * w
+    regions = [r for r in regions
+               if (r[2] * r[3]) < img_area * 0.15]
+
     return regions
