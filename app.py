@@ -11,6 +11,15 @@ from backend.heatmap import generate_heatmap, draw_boxes
 from backend.report import generate_report
 from utils.analytics import init_analytics, record_scan, get_stats
 
+# Deep Learning analyzer (optional — falls back if model missing)
+try:
+    from backend.dl_analyzer import detect_anomalies_dl
+    DL_AVAILABLE = True
+except Exception:
+    DL_AVAILABLE = False
+    def detect_anomalies_dl(*args, **kwargs):
+        return None
+
 try:
     from streamlit_extras.let_it_rain import rain
     CONFETTI_AVAILABLE = True
@@ -149,6 +158,22 @@ with st.sidebar:
     st.markdown("### ⚙️ Analysis Settings")
     st.caption("Tune how sensitive the AI should be.")
 
+    # ============ NEW: AI Engine toggle ============
+    if DL_AVAILABLE:
+        analysis_mode = st.radio(
+            "AI Engine",
+            options=[
+                "⚡ Statistical (fast)",
+                "🧠 Deep Learning (accurate)"
+            ],
+            index=0,
+            help="Statistical: fast block-based detection. "
+                 "Deep Learning: neural network reconstruction error (slower, more accurate)."
+        )
+    else:
+        analysis_mode = "⚡ Statistical (fast)"
+        st.caption("ℹ️ Deep Learning mode unavailable — model not loaded.")
+
     sensitivity = st.slider(
         "Detection Sensitivity",
         min_value=0.3, max_value=0.9, value=0.85, step=0.05,
@@ -249,9 +274,18 @@ if uploaded_file is not None:
         file_bytes = uploaded_file.read()
         start_time = time.time()
 
-        with st.spinner("Analyzing image..."):
+        with st.spinner(f"Analyzing with {analysis_mode}..."):
             original, enhanced, normalized = preprocess(file_bytes)
-            anomaly_map = detect_anomalies(enhanced, block_size=block_size)
+
+            # ============ NEW: choose engine ============
+            if "Deep Learning" in analysis_mode and DL_AVAILABLE:
+                anomaly_map = detect_anomalies_dl(enhanced)
+                if anomaly_map is None:
+                    st.warning("Deep Learning failed — falling back to Statistical.")
+                    anomaly_map = detect_anomalies(enhanced, block_size=block_size)
+            else:
+                anomaly_map = detect_anomalies(enhanced, block_size=block_size)
+
             regions = find_anomaly_regions(anomaly_map, threshold=sensitivity)
 
             raw_heat, overlay = generate_heatmap(original, anomaly_map)
@@ -268,6 +302,7 @@ if uploaded_file is not None:
         st.session_state.overlay = overlay
         st.session_state.regions = regions
         st.session_state.report = report
+        st.session_state.analysis_mode = analysis_mode
 
         record_scan(
             filename=uploaded_file.name,
@@ -285,7 +320,7 @@ if uploaded_file is not None:
             '<div class="section-header">'
             '<span class="section-header-icon">🖼️</span>'
             '<div><h2 class="section-header-text">Analysis Results</h2>'
-            '<p class="section-header-desc">Four views of the AI analysis pipeline</p></div>'
+            f'<p class="section-header-desc">Mode: {st.session_state.get("analysis_mode", "Statistical")}</p></div>'
             '</div>',
             unsafe_allow_html=True
         )
@@ -411,10 +446,11 @@ with st.expander("🩺 Is SCANOVA AI a medical device?"):
 
 with st.expander("🧠 How does the AI actually work?"):
     st.markdown(
-        "Two stages: (1) **Preprocessing** — resize, denoise, contrast-enhance "
-        "via CLAHE. (2) **Anomaly detection** — the image is scanned in blocks; "
-        "regions that deviate from surrounding tissue are flagged. An upcoming "
-        "version will use a PyTorch autoencoder for higher accuracy."
+        "Two engines available:\n\n"
+        "1. **Statistical** — block-based deviation detection. Fast.\n"
+        "2. **Deep Learning** — a PyTorch autoencoder trained on 500 healthy "
+        "chest X-rays. Flags regions the model cannot reconstruct well.\n\n"
+        "Switch between them in the sidebar."
     )
 
 with st.expander("🔒 Is my data stored?"):
@@ -459,6 +495,7 @@ st.markdown(
     '<div>'
     '<span class="footer-badge">Python</span>'
     '<span class="footer-badge">OpenCV</span>'
+    '<span class="footer-badge">PyTorch</span>'
     '<span class="footer-badge">Streamlit</span>'
     '<span class="footer-badge">v3.0</span>'
     '</div>'
