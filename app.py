@@ -8,12 +8,14 @@ from backend.analyzer import detect_anomalies, find_anomaly_regions
 from backend.heatmap import generate_heatmap, draw_boxes
 from backend.report import generate_report
 
+
 # ---------- Page Setup ----------
 st.set_page_config(
     page_title="SCANOVA AI",
     page_icon="🩻",
     layout="wide"
 )
+
 
 # ---------- Header ----------
 st.title("🩻 SCANOVA AI")
@@ -25,6 +27,7 @@ st.warning(
 )
 
 st.divider()
+
 
 # ---------- Sidebar ----------
 with st.sidebar:
@@ -43,12 +46,10 @@ with st.sidebar:
     st.divider()
     st.caption("Built with Python • OpenCV • Streamlit")
 
-# ---------- Upload ----------
-# ---------- Upload ----------
+
 # ---------- Upload ----------
 st.markdown("### 📤 Upload Medical Image")
 
-# Initialize session state for uploaded file
 if "uploaded_file" not in st.session_state:
     st.session_state.uploaded_file = None
 
@@ -64,14 +65,13 @@ with col1:
         st.session_state.uploaded_file = uploaded
 
 with col2:
-    st.write("")  # small vertical spacing
+    st.write("")
     sample_btn = st.button(
         "🎯 Try Sample",
         use_container_width=True,
         help="Load a sample chest X-ray"
     )
 
-# Handle sample button click
 if sample_btn:
     try:
         with open("assets/sample_xray.png", "rb") as f:
@@ -79,17 +79,18 @@ if sample_btn:
         sample_io = io.BytesIO(sample_bytes)
         sample_io.name = "sample_xray.png"
         st.session_state.uploaded_file = sample_io
-        st.rerun()  # Force re-run so button enables
+        st.rerun()
     except FileNotFoundError:
         st.error("Sample image not found. Please upload your own.")
 
-# Use the session state version
 uploaded_file = st.session_state.uploaded_file
+
 analyze_btn = st.button(
     "🔍 Analyze Image",
     type="primary",
     disabled=uploaded_file is None
 )
+
 
 # ---------- Process ----------
 if uploaded_file is not None:
@@ -99,22 +100,16 @@ if uploaded_file is not None:
         file_bytes = uploaded_file.read()
 
         with st.spinner("Analyzing image..."):
-            # 1. Preprocess
             original, enhanced, normalized = preprocess(file_bytes)
-
-            # 2. Detect anomalies
             anomaly_map = detect_anomalies(enhanced, block_size=block_size)
             regions = find_anomaly_regions(anomaly_map, threshold=sensitivity)
 
-            # 3. Generate heatmap
             raw_heat, overlay = generate_heatmap(original, anomaly_map)
             if show_boxes:
                 overlay = draw_boxes(overlay, regions)
 
-            # 4. Report
             report = generate_report(anomaly_map, regions, threshold=sensitivity)
 
-        # Save to session state
         st.session_state.original = original
         st.session_state.processed = enhanced
         st.session_state.heatmap = raw_heat
@@ -127,12 +122,17 @@ if uploaded_file is not None:
         st.divider()
         st.markdown("### 🖼️ Analysis Results")
 
-        col1, col2 = st.columns(2)
+        mobile_view = st.toggle("📱 Mobile View (stack images)", value=False)
 
-        with col1:
+        if mobile_view:
             st.image(
                 st.session_state.original,
                 caption="① Original (resized)",
+                use_container_width=True
+            )
+            st.image(
+                st.session_state.processed,
+                caption="② Preprocessed (CLAHE)",
                 use_container_width=True
             )
             st.image(
@@ -140,28 +140,51 @@ if uploaded_file is not None:
                 caption="③ Anomaly Heatmap",
                 use_container_width=True
             )
-
-        with col2:
-            st.image(
-                st.session_state.processed,
-                caption="② Preprocessed (CLAHE)",
-                use_container_width=True
-            )
             st.image(
                 st.session_state.overlay,
                 caption="④ Detection Overlay",
                 use_container_width=True
             )
+        else:
+            c1, c2 = st.columns(2)
+            with c1:
+                st.image(
+                    st.session_state.original,
+                    caption="① Original (resized)",
+                    use_container_width=True
+                )
+                st.image(
+                    st.session_state.heatmap,
+                    caption="③ Anomaly Heatmap",
+                    use_container_width=True
+                )
+            with c2:
+                st.image(
+                    st.session_state.processed,
+                    caption="② Preprocessed (CLAHE)",
+                    use_container_width=True
+                )
+                st.image(
+                    st.session_state.overlay,
+                    caption="④ Detection Overlay",
+                    use_container_width=True
+                )
 
+        # ---------- Report ----------
         st.divider()
         st.markdown("### 📋 Analysis Report")
-
         r = st.session_state.report
 
-        c1, c2, c3 = st.columns(3)
-        c1.metric("Regions Found", r["regions_found"])
-        c2.metric("Affected Area", f"{r['affected_area_percent']}%")
-        c3.metric("Status", r["level"].upper())
+        if mobile_view:
+            c1, c2 = st.columns(2)
+            c1.metric("Regions Found", r["regions_found"])
+            c2.metric("Status", r["level"].upper())
+            st.metric("Affected Area", f"{r['affected_area_percent']}%")
+        else:
+            c1, c2, c3 = st.columns(3)
+            c1.metric("Regions Found", r["regions_found"])
+            c2.metric("Affected Area", f"{r['affected_area_percent']}%")
+            c3.metric("Status", r["level"].upper())
 
         if r["level"] == "safe":
             st.success(r["status"])
@@ -172,8 +195,16 @@ if uploaded_file is not None:
 
         st.info(r["disclaimer"])
 
-        # Download button
-                # PDF report download
+        # ---------- Downloads ----------
+        buf = io.BytesIO()
+        Image.fromarray(st.session_state.overlay).save(buf, format="PNG")
+        st.download_button(
+            "⬇️ Download Result (PNG)",
+            buf.getvalue(),
+            "scanova_result.png",
+            "image/png"
+        )
+
         try:
             from backend.pdf_report import generate_pdf_report
             pdf_bytes = generate_pdf_report(
