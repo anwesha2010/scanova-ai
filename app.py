@@ -20,28 +20,19 @@ st.set_page_config(
 # ---------- Load Custom CSS ----------
 try:
     with open("branding/styles.css") as f:
-        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
-except FileNotFoundError:
-    pass  # Skip CSS if file is missing
+        css = f.read()
+    st.markdown(f"<style>{css}</style>", unsafe_allow_html=True)
+except Exception:
+    pass
 
 
-# ---------- Header with Logo ----------
-import base64
-
-try:
-    with open("branding/logo.svg", "rb") as f:
-        logo_b64 = base64.b64encode(f.read()).decode()
-
-    st.markdown(f"""
-        <div class="brand-header">
-            <img src="data:image/svg+xml;base64,{logo_b64}" class="brand-logo" />
-            <h1 class="brand-title">SCANOVA AI</h1>
-        </div>
-        <p class="brand-tagline">AI-Powered Medical Image Analysis Assistant</p>
-    """, unsafe_allow_html=True)
-except FileNotFoundError:
-    st.title("🩻 SCANOVA AI")
-    st.caption("AI-Powered Medical Image Analysis Assistant")
+# ---------- Header ----------
+st.markdown(
+    '<h1 style="color: #0f172a; font-weight: 800; '
+    'letter-spacing: -0.02em; margin-bottom: 0;">🩻 SCANOVA AI</h1>',
+    unsafe_allow_html=True
+)
+st.caption("AI-Powered Medical Image Analysis Assistant")
 
 st.warning(
     "⚠️ **Assistive tool only.** This does not replace professional "
