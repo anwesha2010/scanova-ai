@@ -11,7 +11,7 @@ from backend.heatmap import generate_heatmap, draw_boxes
 from backend.report import generate_report
 from utils.analytics import init_analytics, record_scan, get_stats
 
-# Deep Learning analyzer (optional — falls back if model missing)
+# Deep Learning analyzer (optional — silently skipped if torch not available)
 try:
     from backend.dl_analyzer import detect_anomalies_dl
     DL_AVAILABLE = True
@@ -158,7 +158,7 @@ with st.sidebar:
     st.markdown("### ⚙️ Analysis Settings")
     st.caption("Tune how sensitive the AI should be.")
 
-    # ============ NEW: AI Engine toggle ============
+    # ============ AI ENGINE TOGGLE ============
     if DL_AVAILABLE:
         analysis_mode = st.radio(
             "AI Engine",
@@ -171,8 +171,8 @@ with st.sidebar:
                  "Deep Learning: neural network reconstruction error (slower, more accurate)."
         )
     else:
+        # Silent fallback — no warning shown (Streamlit Cloud has no torch)
         analysis_mode = "⚡ Statistical (fast)"
-        st.caption("ℹ️ Deep Learning mode unavailable — model not loaded.")
 
     sensitivity = st.slider(
         "Detection Sensitivity",
@@ -277,11 +277,10 @@ if uploaded_file is not None:
         with st.spinner(f"Analyzing with {analysis_mode}..."):
             original, enhanced, normalized = preprocess(file_bytes)
 
-            # ============ NEW: choose engine ============
+            # ============ Choose engine ============
             if "Deep Learning" in analysis_mode and DL_AVAILABLE:
                 anomaly_map = detect_anomalies_dl(enhanced)
                 if anomaly_map is None:
-                    st.warning("Deep Learning failed — falling back to Statistical.")
                     anomaly_map = detect_anomalies(enhanced, block_size=block_size)
             else:
                 anomaly_map = detect_anomalies(enhanced, block_size=block_size)
@@ -320,7 +319,7 @@ if uploaded_file is not None:
             '<div class="section-header">'
             '<span class="section-header-icon">🖼️</span>'
             '<div><h2 class="section-header-text">Analysis Results</h2>'
-            f'<p class="section-header-desc">Mode: {st.session_state.get("analysis_mode", "Statistical")}</p></div>'
+            f'<p class="section-header-desc">Engine: {st.session_state.get("analysis_mode", "Statistical")}</p></div>'
             '</div>',
             unsafe_allow_html=True
         )
@@ -449,8 +448,7 @@ with st.expander("🧠 How does the AI actually work?"):
         "Two engines available:\n\n"
         "1. **Statistical** — block-based deviation detection. Fast.\n"
         "2. **Deep Learning** — a PyTorch autoencoder trained on 500 healthy "
-        "chest X-rays. Flags regions the model cannot reconstruct well.\n\n"
-        "Switch between them in the sidebar."
+        "chest X-rays. Flags regions the model cannot reconstruct well."
     )
 
 with st.expander("🔒 Is my data stored?"):
@@ -495,7 +493,6 @@ st.markdown(
     '<div>'
     '<span class="footer-badge">Python</span>'
     '<span class="footer-badge">OpenCV</span>'
-    '<span class="footer-badge">PyTorch</span>'
     '<span class="footer-badge">Streamlit</span>'
     '<span class="footer-badge">v3.0</span>'
     '</div>'
