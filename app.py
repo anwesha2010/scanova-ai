@@ -10,11 +10,17 @@ from backend.heatmap import generate_heatmap, draw_boxes
 from backend.report import generate_report
 from utils.analytics import init_analytics, record_scan, get_stats
 
+try:
+    from streamlit_extras.let_it_rain import rain
+    CONFETTI_AVAILABLE = True
+except Exception:
+    CONFETTI_AVAILABLE = False
+
 
 # ---------- Page Setup ----------
 st.set_page_config(
     page_title="SCANOVA AI — Medical Image Analysis",
-    page_icon="🩻",
+    page_icon="branding/favicon.png",
     layout="wide"
 )
 
@@ -167,7 +173,7 @@ with col2:
     sample_btn = st.button(
         "🎯 Try Sample",
         use_container_width=True,
-        help="Load a sample chest X-ray"
+        help="Load a sample chest X-ray (auto-analyzes)"
     )
 
 if sample_btn:
@@ -177,6 +183,7 @@ if sample_btn:
         sample_io = io.BytesIO(sample_bytes)
         sample_io.name = "sample_xray.png"
         st.session_state.uploaded_file = sample_io
+        st.session_state.auto_analyze = True
         st.rerun()
     except FileNotFoundError:
         st.error("Sample image not found. Please upload your own.")
@@ -188,6 +195,11 @@ analyze_btn = st.button(
     type="primary",
     disabled=uploaded_file is None
 )
+
+# Auto-trigger analyze if flagged (from Try Sample)
+if st.session_state.get("auto_analyze", False) and uploaded_file is not None:
+    analyze_btn = True
+    st.session_state.auto_analyze = False
 
 
 # ---------- Process ----------
@@ -292,6 +304,13 @@ if uploaded_file is not None:
 
         if r["level"] == "safe":
             st.success(r["status"])
+            if CONFETTI_AVAILABLE:
+                rain(
+                    emoji="✨",
+                    font_size=26,
+                    falling_speed=6,
+                    animation_length=1.2,
+                )
         elif r["level"] == "warning":
             st.warning(r["status"])
         else:
