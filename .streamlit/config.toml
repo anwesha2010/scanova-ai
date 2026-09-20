@@ -3,7 +3,6 @@ primaryColor = "#0ea5e9"
 backgroundColor = "#ffffff"
 secondaryBackgroundColor = "#f0f9ff"
 textColor = "#0f172a"
-font = "sans serif"
 
 [server]
 maxUploadSize = 200
@@ -11,6 +10,7 @@ enableXsrfProtection = true
 
 [browser]
 gatherUsageStats = false
+
 [client]
 toolbarMode = "minimal"
 showErrorDetails = true

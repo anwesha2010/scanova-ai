@@ -1,4 +1,5 @@
 import streamlit as st
+import base64
 
 st.set_page_config(
     page_title="About - SCANOVA AI",
@@ -6,7 +7,26 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("ℹ️ About SCANOVA AI")
+# Load custom CSS
+try:
+    with open("branding/styles.css") as f:
+        st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+except FileNotFoundError:
+    pass
+
+# Header with logo
+try:
+    with open("branding/logo.svg", "rb") as f:
+        logo_b64 = base64.b64encode(f.read()).decode()
+
+    st.markdown(f"""
+        <div class="brand-header">
+            <img src="data:image/svg+xml;base64,{logo_b64}" class="brand-logo" />
+            <h1 class="brand-title">About SCANOVA AI</h1>
+        </div>
+    """, unsafe_allow_html=True)
+except FileNotFoundError:
+    st.title("ℹ️ About SCANOVA AI")
 
 st.markdown("""
 ### 🎯 Purpose
