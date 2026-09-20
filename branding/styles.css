@@ -485,3 +485,12 @@ hr {
     margin-bottom: 0 !important;
     margin-top: 0 !important;
 }
+/* Align hero row heights */
+[data-testid="column"] {
+    vertical-align: top !important;
+}
+
+/* Compact column wrapper for disclaimer */
+[data-testid="column"]:has(.stAlert) > div {
+    min-height: auto !important;
+}
