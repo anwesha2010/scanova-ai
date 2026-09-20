@@ -44,12 +44,35 @@ with st.sidebar:
     st.caption("Built with Python • OpenCV • Streamlit")
 
 # ---------- Upload ----------
+# ---------- Upload ----------
 st.markdown("### 📤 Upload Medical Image")
 
-uploaded_file = st.file_uploader(
-    "Supported: PNG, JPG, JPEG",
-    type=["png", "jpg", "jpeg"]
-)
+col1, col2 = st.columns([3, 1])
+
+with col1:
+    uploaded_file = st.file_uploader(
+        "Supported: PNG, JPG, JPEG",
+        type=["png", "jpg", "jpeg"],
+        label_visibility="collapsed"
+    )
+
+with col2:
+    st.write("")  # small vertical spacing
+    sample_btn = st.button(
+        "🎯 Try Sample",
+        use_container_width=True,
+        help="Load a sample chest X-ray"
+    )
+
+# Handle sample button click
+if sample_btn:
+    try:
+        with open("assets/sample_xray.png", "rb") as f:
+            sample_bytes = f.read()
+        uploaded_file = io.BytesIO(sample_bytes)
+        uploaded_file.name = "sample_xray.png"
+    except FileNotFoundError:
+        st.error("Sample image not found. Please upload your own.")
 
 analyze_btn = st.button(
     "🔍 Analyze Image",
