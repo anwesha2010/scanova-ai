@@ -1,6 +1,6 @@
 /* ============================================
    SCANOVA AI — Design System v3
-   InnoEx Competition Edition
+   InnoEx Competition Edition + Mobile Optimized
    ============================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap');
@@ -890,9 +890,25 @@ hr {
 }
 
 /* ============================================
-   RESPONSIVE
+   RESPONSIVE — Full mobile optimization
    ============================================ */
+
+/* Prevent horizontal overflow on mobile */
 @media (max-width: 900px) {
+    html, body {
+        overflow-x: hidden !important;
+    }
+    [data-testid="stAppViewContainer"] {
+        overflow-x: hidden !important;
+    }
+    img {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+}
+
+/* ---------- TABLETS (max 1024px) ---------- */
+@media (max-width: 1024px) {
     .hero-split {
         grid-template-columns: 1fr;
         gap: 2rem;
@@ -900,43 +916,340 @@ hr {
     }
     .hero-right {
         order: -1;
+        justify-content: flex-start;
     }
     .hero-image-wrap {
         max-width: 100%;
         transform: rotate(0deg);
     }
     .hero-headline {
-        font-size: 2.25rem !important;
+        font-size: clamp(2rem, 5vw, 3rem) !important;
     }
 }
 
+/* ---------- SMALL TABLETS (max 768px) ---------- */
 @media (max-width: 768px) {
+    .main .block-container {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+        padding-bottom: 2rem !important;
+    }
+
+    /* Banner */
     .top-banner {
-        margin: 0 -1.5rem 1.5rem -1.5rem;
-        padding: 10px 16px;
+        margin: 0 -1rem 1rem -1rem !important;
+        padding: 10px 14px !important;
+    }
+    .top-banner-content {
+        gap: 8px !important;
+        justify-content: flex-start !important;
     }
     .top-banner-text {
-        font-size: 0.78rem;
+        font-size: 0.76rem !important;
+        line-height: 1.4 !important;
     }
     .top-banner-pill {
-        font-size: 0.6rem;
-        padding: 2px 8px;
+        font-size: 0.58rem !important;
+        padding: 2px 8px !important;
     }
-    .modality-section {
-        padding: 1.25rem 1.5rem;
-        border-radius: 14px;
+    .top-banner-arrow {
+        display: none !important;
     }
-    .modality-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 12px;
+
+    /* Hero */
+    .hero-split {
+        gap: 1.5rem !important;
+        padding: 0.5rem 0 1rem 0 !important;
     }
-    .modality-card {
-        padding: 1rem 0.9rem;
+    .hero-image-wrap {
+        border-radius: 16px !important;
+        max-height: 320px !important;
+        aspect-ratio: auto !important;
     }
-    .modality-card-icon {
-        font-size: 2rem;
+    .hero-image-wrap img {
+        max-height: 320px !important;
+        object-fit: cover !important;
+    }
+    .hero-image-badge {
+        padding: 5px 10px !important;
+        font-size: 0.62rem !important;
+        bottom: 12px !important;
+        left: 12px !important;
+    }
+    .hero-eyebrow {
+        font-size: 0.6rem !important;
+        padding: 5px 10px !important;
+        letter-spacing: 0.1em !important;
+        margin-bottom: 1rem !important;
     }
     .hero-headline {
-        font-size: 2rem;
+        font-size: 1.85rem !important;
+        margin-bottom: 1rem !important;
+        line-height: 1.05 !important;
+    }
+    .hero-headline br {
+        display: none !important;
+    }
+    .hero-sub {
+        font-size: 0.95rem !important;
+        line-height: 1.55 !important;
+        margin-bottom: 1.5rem !important;
+    }
+    .hero-ctas {
+        flex-direction: column !important;
+        gap: 8px !important;
+        margin-bottom: 1.5rem !important;
+    }
+    .cta-primary,
+    .cta-secondary {
+        width: 100% !important;
+        justify-content: center !important;
+        padding: 12px 18px !important;
+        font-size: 0.9rem !important;
+    }
+    .trust-strip {
+        gap: 12px !important;
+        padding-top: 1rem !important;
+    }
+    .trust-item {
+        font-size: 0.62rem !important;
+    }
+
+    /* Modality section */
+    .modality-section {
+        padding: 1.25rem 1.25rem !important;
+        border-radius: 14px !important;
+        margin: 1rem 0 1.5rem 0 !important;
+    }
+    .modality-title {
+        font-size: 1.4rem !important;
+    }
+    .modality-desc {
+        font-size: 0.85rem !important;
+    }
+    .modality-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+        margin-top: 1rem !important;
+    }
+    .modality-card {
+        padding: 1rem 1rem !important;
+    }
+    .modality-card-icon {
+        font-size: 1.75rem !important;
+        margin-bottom: 0.6rem !important;
+    }
+    .modality-card-number {
+        margin-bottom: 0.6rem !important;
+        font-size: 0.62rem !important;
+    }
+    .modality-card-title {
+        font-size: 1.05rem !important;
+    }
+    .modality-card-desc {
+        font-size: 0.8rem !important;
+    }
+
+    /* Live card */
+    .live-card {
+        padding: 0.9rem 1rem !important;
+        border-radius: 12px !important;
+    }
+    .live-stat-value {
+        font-size: 1rem !important;
+    }
+    .live-stat-value.accent {
+        font-size: 1.15rem !important;
+    }
+
+    /* Section headers */
+    .section-header {
+        gap: 8px !important;
+        margin: 1.5rem 0 0.75rem 0 !important;
+    }
+    .section-header-icon {
+        font-size: 1.4rem !important;
+    }
+    .section-header-text {
+        font-size: 1.2rem !important;
+    }
+    .section-header-desc {
+        font-size: 0.8rem !important;
+    }
+
+    /* Founder quote */
+    .founder-quote {
+        padding: 1.25rem 1.25rem !important;
+        font-size: 0.95rem !important;
+        margin-top: 2.5rem !important;
+    }
+
+    /* Footer */
+    .app-footer {
+        margin-top: 2.5rem !important;
+        padding-top: 1.5rem !important;
+        font-size: 0.75rem !important;
+    }
+    .footer-badge {
+        font-size: 0.62rem !important;
+        padding: 3px 8px !important;
+    }
+
+    /* Buttons full-width */
+    .stButton > button {
+        width: 100% !important;
+    }
+}
+
+/* ---------- STANDARD PHONES (max 640px) ---------- */
+@media (max-width: 640px) {
+    .main .block-container {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+    }
+
+    .top-banner {
+        margin: 0 -0.75rem 0.75rem -0.75rem !important;
+        padding: 8px 10px !important;
+    }
+    .top-banner-text {
+        font-size: 0.7rem !important;
+    }
+    .top-banner-pill {
+        font-size: 0.55rem !important;
+        padding: 2px 6px !important;
+    }
+
+    .hero-headline {
+        font-size: 1.65rem !important;
+        letter-spacing: -0.03em !important;
+    }
+    .hero-sub {
+        font-size: 0.9rem !important;
+    }
+    .hero-eyebrow {
+        font-size: 0.55rem !important;
+        padding: 4px 8px !important;
+        letter-spacing: 0.08em !important;
+    }
+    .hero-image-wrap {
+        border-radius: 12px !important;
+        max-height: 260px !important;
+    }
+    .hero-image-wrap img {
+        max-height: 260px !important;
+    }
+    .hero-image-badge {
+        padding: 4px 8px !important;
+        font-size: 0.58rem !important;
+    }
+    .hero-image-badge::before {
+        width: 6px !important;
+        height: 6px !important;
+    }
+
+    .section-header-text {
+        font-size: 1.05rem !important;
+    }
+    .section-header-desc {
+        font-size: 0.75rem !important;
+    }
+
+    .modality-section {
+        padding: 1rem 1rem !important;
+    }
+    .modality-title {
+        font-size: 1.2rem !important;
+    }
+    .modality-eyebrow {
+        font-size: 0.6rem !important;
+        letter-spacing: 0.14em !important;
+    }
+
+    [data-testid="stMetric"] {
+        padding: 0.9rem 1rem !important;
+    }
+    [data-testid="stMetricValue"] {
+        font-size: 1.4rem !important;
+    }
+    [data-testid="stMetricLabel"] {
+        font-size: 0.7rem !important;
+    }
+
+    [data-testid="stExpander"] summary {
+        font-size: 0.9rem !important;
+    }
+    [data-testid="stExpander"] p {
+        font-size: 0.85rem !important;
+    }
+}
+
+/* ---------- SMALL PHONES (max 480px) ---------- */
+@media (max-width: 480px) {
+    .main .block-container {
+        padding-left: 0.5rem !important;
+        padding-right: 0.5rem !important;
+    }
+
+    .top-banner {
+        margin: 0 -0.5rem 0.5rem -0.5rem !important;
+        padding: 6px 8px !important;
+    }
+    .top-banner-text {
+        font-size: 0.65rem !important;
+        display: block !important;
+    }
+
+    .hero-headline {
+        font-size: 1.5rem !important;
+    }
+    .hero-sub {
+        font-size: 0.85rem !important;
+        line-height: 1.5 !important;
+    }
+    .cta-primary,
+    .cta-secondary {
+        padding: 10px 16px !important;
+        font-size: 0.85rem !important;
+    }
+    .hero-image-wrap {
+        max-height: 220px !important;
+    }
+    .hero-image-wrap img {
+        max-height: 220px !important;
+    }
+
+    .modality-card {
+        padding: 0.85rem 0.85rem !important;
+    }
+    .modality-card-icon {
+        font-size: 1.5rem !important;
+    }
+    .modality-card-title {
+        font-size: 0.95rem !important;
+    }
+    .modality-card-desc {
+        font-size: 0.75rem !important;
+    }
+
+    .live-card {
+        padding: 0.75rem 0.85rem !important;
+    }
+    .live-stat-label {
+        font-size: 0.72rem !important;
+    }
+    .live-stat-value {
+        font-size: 0.9rem !important;
+    }
+    .live-stat-value.accent {
+        font-size: 1rem !important;
+    }
+
+    .founder-quote {
+        padding: 1rem 1rem !important;
+        font-size: 0.85rem !important;
+    }
+    .founder-quote .attr {
+        font-size: 0.72rem !important;
     }
 }
