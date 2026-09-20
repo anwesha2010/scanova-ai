@@ -51,7 +51,7 @@ st.markdown(f"""
         </p>
         <div class="hero-ctas">
             <a href="#upload" class="cta-primary">Analyze a scan →</a>
-            <a href="/1_About" target="_self" class="cta-secondary">Read our story</a>
+            <a href="/About" target="_self" class="cta-secondary">Read our story</a>
         </div>
         <div class="trust-strip">
             <span class="trust-item"><strong>Python</strong></span>
@@ -96,8 +96,6 @@ with col_right:
             </div>
         </div>
     """, unsafe_allow_html=True)
-
-
 
 
 # ---------- Sidebar ----------
