@@ -102,12 +102,12 @@ if uploaded_file is not None:
             st.image(st.session_state.heatmap,
                      caption="③ Anomaly Heatmap",
                      use_container_width=True)
-        with col2:
-            st.image(st.session_state.processed,
-                     caption="② Preprocessed (CLAHE)",
+                with col1:
+            st.image(st.session_state.original,
+                     caption="① Original (resized)",
                      use_container_width=True)
-            st.image(st.session_state.overlay,
-                     caption="④ Detection Overlay",
+            st.image(st.session_state.heatmap,
+                     caption="③ Anomaly Heatmap",
                      use_container_width=True)
         st.divider()
         st.markdown("### 📋 Analysis Report")
