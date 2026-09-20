@@ -139,11 +139,18 @@ if uploaded_file is not None:
         st.info(r["disclaimer"])
 
         # Download button
-        buf = io.BytesIO()
-        Image.fromarray(st.session_state.overlay).save(buf, format="PNG")
-        st.download_button(
-            "⬇️ Download Result",
-            buf.getvalue(),
-            "scanova_result.png",
-            "image/png"
-        )
+                # PDF report download
+        try:
+            from backend.pdf_report import generate_pdf_report
+            pdf_bytes = generate_pdf_report(
+                st.session_state.report,
+                st.session_state.overlay
+            )
+            st.download_button(
+                "📄 Download PDF Report",
+                pdf_bytes,
+                "scanova_report.pdf",
+                "application/pdf"
+            )
+        except Exception as e:
+            st.warning(f"PDF generation unavailable: {e}")
