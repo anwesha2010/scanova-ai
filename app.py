@@ -8,7 +8,7 @@ from backend.analyzer import detect_anomalies, find_anomaly_regions
 from backend.heatmap import generate_heatmap, draw_boxes
 from backend.report import generate_report
 
-# ---------- Setup ----------
+# ---------- Page Setup ----------
 st.set_page_config(
     page_title="SCANOVA AI",
     page_icon="🩻",
@@ -78,8 +78,7 @@ if uploaded_file is not None:
                 overlay = draw_boxes(overlay, regions)
 
             # 4. Report
-            report = generate_report(anomaly_map, regions,
-                                     threshold=sensitivity)
+            report = generate_report(anomaly_map, regions, threshold=sensitivity)
 
         # Save to session state
         st.session_state.original = original
@@ -89,28 +88,40 @@ if uploaded_file is not None:
         st.session_state.regions = regions
         st.session_state.report = report
 
-    # ---------- Display ----------
+    # ---------- Display Results ----------
     if "original" in st.session_state and st.session_state.original is not None:
         st.divider()
         st.markdown("### 🖼️ Analysis Results")
 
         col1, col2 = st.columns(2)
+
         with col1:
-                        st.image(st.session_state.original,
-                     caption="① Original (resized)",
-                     use_container_width=True)
-            st.image(st.session_state.heatmap,
-                     caption="③ Anomaly Heatmap",
-                     use_container_width=True)
-                with col1:
-            st.image(st.session_state.original,
-                     caption="① Original (resized)",
-                     use_container_width=True)
-            st.image(st.session_state.heatmap,
-                     caption="③ Anomaly Heatmap",
-                     use_container_width=True)
+            st.image(
+                st.session_state.original,
+                caption="① Original (resized)",
+                use_container_width=True
+            )
+            st.image(
+                st.session_state.heatmap,
+                caption="③ Anomaly Heatmap",
+                use_container_width=True
+            )
+
+        with col2:
+            st.image(
+                st.session_state.processed,
+                caption="② Preprocessed (CLAHE)",
+                use_container_width=True
+            )
+            st.image(
+                st.session_state.overlay,
+                caption="④ Detection Overlay",
+                use_container_width=True
+            )
+
         st.divider()
         st.markdown("### 📋 Analysis Report")
+
         r = st.session_state.report
 
         c1, c2, c3 = st.columns(3)
