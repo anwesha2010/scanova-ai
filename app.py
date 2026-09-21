@@ -11,7 +11,7 @@ from backend.heatmap import generate_heatmap, draw_boxes
 from backend.report import generate_report
 from utils.analytics import init_analytics, record_scan, get_stats
 
-# Deep Learning analyzer (optional — silently skipped if torch not available)
+# Deep Learning analyzer (ONNX-based)
 try:
     from backend.dl_analyzer import detect_anomalies_dl
     DL_AVAILABLE = True
@@ -63,7 +63,7 @@ st.markdown(
 
 
 # ==========================================================
-# HERO SECTION — split layout with image
+# HERO SECTION
 # ==========================================================
 hero_stats = get_stats()
 
@@ -94,13 +94,13 @@ st.markdown(f"""
 
 
 # ==========================================================
-# WHAT IT READS — Premium dark modality section
+# WHAT IT READS — Modality grid
 # ==========================================================
 st.markdown(
     '<div class="modality-section">'
     '<div class="modality-eyebrow">SUPPORTED MODALITIES</div>'
     '<h2 class="modality-title">One tool. <em>Four scan types.</em></h2>'
-    '<p class="modality-desc">SCANOVA handles the most common imaging formats in seconds. Best results with clear, well-centered scans.</p>'
+    '<p class="modality-desc">SCANOVA ships with four specialized neural networks — one per modality — plus an auto-router that picks the right one.</p>'
     '</div>',
     unsafe_allow_html=True
 )
@@ -109,13 +109,13 @@ mod_col1, mod_col2, mod_col3, mod_col4 = st.columns(4)
 
 cards = [
     ("c1", "01 / 04", "🩻", "Chest X-rays",
-     "Frontal views, PA/AP projections. Detects density variations and unusual regions in lung fields."),
+     "Production-ready. Trained on 500 frontal chest X-rays. Detects density variations in lung fields."),
     ("c2", "02 / 04", "🧠", "Brain MRI",
-     "T1 / T2 axial slices. Flags asymmetric regions and abnormal signal intensity patterns."),
+     "Trained on 500 normal brain MRIs. Flags asymmetric regions and abnormal signal patterns."),
     ("c3", "03 / 04", "🫁", "Chest CT",
-     "Axial slices. Highlights structural irregularities in lung parenchyma and mediastinum."),
-    ("c4", "04 / 04", "🦴", "Bone Scans",
-     "Long-bone and joint views. Surfaces density discontinuities that may warrant review."),
+     "Trained on 100 chest CT slices. Highlights structural irregularities in lung tissue."),
+    ("c4", "04 / 04", "🦴", "Bone Scan",
+     "Trained on 500 bone X-rays. Surfaces density discontinuities in long bones and joints."),
 ]
 
 for col, (cls, num, icon, title, desc) in zip(
@@ -158,7 +158,7 @@ with st.sidebar:
     st.markdown("### ⚙️ Analysis Settings")
     st.caption("Tune how sensitive the AI should be.")
 
-    # ============ AI ENGINE TOGGLE ============
+    # ============ AI Engine ============
     if DL_AVAILABLE:
         analysis_mode = st.radio(
             "AI Engine",
@@ -168,15 +168,32 @@ with st.sidebar:
             ],
             index=0,
             help="Statistical: fast block-based detection. "
-                 "Deep Learning: neural network reconstruction error (slower, more accurate)."
+                 "Deep Learning: neural network reconstruction error."
         )
+
+        # ============ Modality Selector (only for DL) ============
+        if "Deep Learning" in analysis_mode:
+            modality_choice = st.selectbox(
+                "Modality",
+                options=[
+                    "🌐 Auto-detect",
+                    "🩻 Chest X-ray",
+                    "🧠 Brain MRI",
+                    "🫁 Chest CT",
+                    "🦴 Bone Scan"
+                ],
+                index=0,
+                help="Auto-detect uses the trained modality classifier."
+            )
+        else:
+            modality_choice = "🌐 Auto-detect"
     else:
-        # Silent fallback — no warning shown (Streamlit Cloud has no torch)
         analysis_mode = "⚡ Statistical (fast)"
+        modality_choice = "🌐 Auto-detect"
 
     sensitivity = st.slider(
         "Detection Sensitivity",
-        min_value=0.3, max_value=0.9, value=0.85, step=0.05,
+        min_value=0.3, max_value=0.9, value=0.65, step=0.05,
         help="Higher = more detections (may include false positives)"
     )
     block_size = st.select_slider(
@@ -279,7 +296,18 @@ if uploaded_file is not None:
 
             # ============ Choose engine ============
             if "Deep Learning" in analysis_mode and DL_AVAILABLE:
-                anomaly_map = detect_anomalies_dl(enhanced)
+                modality_map = {
+                    "🌐 Auto-detect": "auto",
+                    "🩻 Chest X-ray": "chest_xray",
+                    "🧠 Brain MRI":  "brain_mri",
+                    "🫁 Chest CT":   "chest_ct",
+                    "🦴 Bone Scan":  "bone_scan",
+                }
+                selected_modality = modality_map.get(modality_choice, "auto")
+
+                anomaly_map = detect_anomalies_dl(
+                    enhanced, modality=selected_modality
+                )
                 if anomaly_map is None:
                     anomaly_map = detect_anomalies(enhanced, block_size=block_size)
             else:
@@ -376,12 +404,7 @@ if uploaded_file is not None:
         if r["level"] == "safe":
             st.success(r["status"])
             if CONFETTI_AVAILABLE:
-                rain(
-                    emoji="✨",
-                    font_size=26,
-                    falling_speed=6,
-                    animation_length=1.2,
-                )
+                rain(emoji="✨", font_size=26, falling_speed=6, animation_length=1.2)
         elif r["level"] == "warning":
             st.warning(r["status"])
         else:
@@ -445,10 +468,10 @@ with st.expander("🩺 Is SCANOVA AI a medical device?"):
 
 with st.expander("🧠 How does the AI actually work?"):
     st.markdown(
-        "Two engines available:\n\n"
-        "1. **Statistical** — block-based deviation detection. Fast.\n"
-        "2. **Deep Learning** — a PyTorch autoencoder trained on 500 healthy "
-        "chest X-rays. Flags regions the model cannot reconstruct well."
+        "SCANOVA runs on **four specialized neural networks** — one per modality "
+        "(chest X-ray, brain MRI, chest CT, bone scan). A modality classifier "
+        "auto-routes your upload to the right model. The model reconstructs "
+        "the image; regions it can't reconstruct well are flagged as anomalies."
     )
 
 with st.expander("🔒 Is my data stored?"):
@@ -493,6 +516,7 @@ st.markdown(
     '<div>'
     '<span class="footer-badge">Python</span>'
     '<span class="footer-badge">OpenCV</span>'
+    '<span class="footer-badge">ONNX</span>'
     '<span class="footer-badge">Streamlit</span>'
     '<span class="footer-badge">v3.0</span>'
     '</div>'
