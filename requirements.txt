@@ -6,3 +6,4 @@ matplotlib
 reportlab
 streamlit-extras
 onnxruntime
+pydicom

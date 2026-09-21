@@ -3,28 +3,57 @@ import numpy as np
 from PIL import Image
 import io
 
+from backend.dicom_loader import is_dicom, load_dicom
+
 TARGET_SIZE = (512, 512)
 
-def preprocess(file_bytes):
+
+def load_image(file_bytes):
     """
-    Takes uploaded image bytes.
-    Returns: (original, enhanced, normalized)
+    Load an image from bytes.
+    Handles DICOM, PNG, JPG, JPEG.
+    Returns grayscale uint8 numpy array.
     """
-    # 1. Read the uploaded bytes into an image
-    pil_img = Image.open(io.BytesIO(file_bytes)).convert("L")
-    img = np.array(pil_img, dtype=np.uint8)
+    # Try DICOM first
+    if is_dicom(file_bytes):
+        dicom_img = load_dicom(file_bytes)
+        if dicom_img is not None:
+            return dicom_img
+    
+    # Fallback to PIL (PNG/JPG)
+    try:
+        pil_img = Image.open(io.BytesIO(file_bytes)).convert("L")
+        return np.array(pil_img, dtype=np.uint8)
+    except Exception:
+        # Last try: cv2
+        arr = np.frombuffer(file_bytes, np.uint8)
+        img = cv2.imdecode(arr, cv2.IMREAD_GRAYSCALE)
+        if img is None:
+            raise ValueError("Could not load image")
+        return img
 
-    # 2. Resize to 512x512
-    img = cv2.resize(img, TARGET_SIZE)
 
-    # 3. Remove noise
-    img = cv2.GaussianBlur(img, (5, 5), 0)
+def resize_image(img):
+    return cv2.resize(img, TARGET_SIZE, interpolation=cv2.INTER_AREA)
 
-    # 4. Enhance contrast (CLAHE)
+
+def denoise(img):
+    return cv2.GaussianBlur(img, (5, 5), 0)
+
+
+def enhance_contrast(img):
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-    enhanced = clahe.apply(img)
+    return clahe.apply(img)
 
-    # 5. Normalize to 0-1
-    normalized = enhanced.astype(np.float32) / 255.0
 
-    return img, enhanced, normalized
+def normalize(img):
+    return img.astype(np.float32) / 255.0
+
+
+def preprocess(file_bytes):
+    """Full pipeline: bytes → (original, enhanced, normalized)."""
+    original = resize_image(load_image(file_bytes))
+    denoised = denoise(original)
+    enhanced = enhance_contrast(denoised)
+    normalized = normalize(enhanced)
+    return original, enhanced, normalized

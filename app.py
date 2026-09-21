@@ -86,7 +86,7 @@ st.markdown(f"""
 <h1 class="hero-headline">AI that sees <em>what<br>tired eyes miss.</em></h1>
 <p class="hero-sub">SCANOVA AI analyzes X-rays, MRIs, and CT scans in seconds — flagging potentially unusual regions with medical-grade heatmaps. <strong>Not a replacement for radiologists. A second pair of eyes.</strong></p>
 <div class="hero-ctas"><a href="#upload" class="cta-primary">Analyze a scan →</a><a href="/About" target="_self" class="cta-secondary">Read our story</a></div>
-<div class="trust-strip"><span class="trust-item"><strong>Python</strong></span><span class="trust-item"><strong>OpenCV</strong></span><span class="trust-item"><strong>ONNX</strong></span><span class="trust-item">MIT Licensed</span><span class="trust-item">v3.0 · InnoEx 2026</span></div>
+<div class="trust-strip"><span class="trust-item"><strong>Python</strong></span><span class="trust-item"><strong>OpenCV</strong></span><span class="trust-item"><strong>ONNX</strong></span><span class="trust-item">DICOM-ready</span><span class="trust-item">MIT Licensed</span><span class="trust-item">v3.0 · InnoEx 2026</span></div>
 </div>
 <div class="hero-right">{hero_img_tag}</div>
 </div>
@@ -171,7 +171,6 @@ with st.sidebar:
             help="Compare mode runs both engines side-by-side."
         )
 
-        # Modality selector (for DL and Compare)
         if "Deep Learning" in analysis_mode or "Compare" in analysis_mode:
             modality_choice = st.selectbox(
                 "Modality",
@@ -228,7 +227,7 @@ st.markdown(
     '<div class="section-header">'
     '<span class="section-header-icon">📤</span>'
     '<div><h2 class="section-header-text">Upload Medical Image</h2>'
-    '<p class="section-header-desc">Supported formats: PNG, JPG, JPEG</p></div>'
+    '<p class="section-header-desc">Supported formats: PNG · JPG · DICOM (.dcm)</p></div>'
     '</div>',
     unsafe_allow_html=True
 )
@@ -243,7 +242,7 @@ col1, col2 = st.columns([3, 1])
 with col1:
     uploaded = st.file_uploader(
         "Upload",
-        type=["png", "jpg", "jpeg"],
+        type=["png", "jpg", "jpeg", "dcm", "dicom"],
         label_visibility="collapsed"
     )
     if uploaded is not None:
@@ -348,7 +347,6 @@ if uploaded_file is not None:
 
         analysis_duration = time.time() - start_time
 
-        # Store in session state
         st.session_state.original = original
         st.session_state.processed = enhanced
         st.session_state.heatmap = raw_heat
@@ -373,7 +371,6 @@ if uploaded_file is not None:
             "time": dl_time,
         } if anomaly_map_dl is not None else None
 
-        # ---- Record in analytics with engine + modality ----
         engine_label = (
             "DL" if "Deep Learning" in analysis_mode
             else ("Compare" if "Compare" in analysis_mode else "Statistical")
@@ -575,6 +572,13 @@ with st.expander("⚖️ What is Compare mode?"):
         "modern AI approaches."
     )
 
+with st.expander("🏥 Does it support DICOM files?"):
+    st.markdown(
+        "**Yes.** SCANOVA reads **DICOM** (`.dcm`) files — the standard format "
+        "used by hospital radiology systems. We handle MONOCHROME1/MONOCHROME2, "
+        "Hounsfield units, window/level, and multi-frame images automatically."
+    )
+
 with st.expander("🔒 Is my data stored?"):
     st.markdown(
         "**No.** Images are processed in-memory only. Nothing is saved, "
@@ -588,7 +592,7 @@ with st.expander("💸 Is it free?"):
     )
 
 st.markdown(
-    "📖 **See all 10 questions →** "
+    "📖 **See all 11 questions →** "
     "[Open the full FAQ page](/FAQ)"
 )
 
@@ -618,6 +622,7 @@ st.markdown(
     '<span class="footer-badge">Python</span>'
     '<span class="footer-badge">OpenCV</span>'
     '<span class="footer-badge">ONNX</span>'
+    '<span class="footer-badge">DICOM</span>'
     '<span class="footer-badge">Streamlit</span>'
     '<span class="footer-badge">v3.0</span>'
     '</div>'
