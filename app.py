@@ -36,18 +36,7 @@ st.set_page_config(
 
 init_analytics()
 
-# Initialize session state for settings
-if "analysis_mode" not in st.session_state:
-    st.session_state.analysis_mode = "⚡ Statistical (fast)"
-if "modality_choice" not in st.session_state:
-    st.session_state.modality_choice = "🌐 Auto-detect"
-if "sensitivity" not in st.session_state:
-    st.session_state.sensitivity = 0.65
-if "block_size" not in st.session_state:
-    st.session_state.block_size = 32
-if "show_boxes" not in st.session_state:
-    st.session_state.show_boxes = True
-
+# Initialize session state
 if "compare_mode" not in st.session_state:
     st.session_state.compare_mode = False
 if "stat_results" not in st.session_state:
@@ -155,10 +144,8 @@ for col, (cls, num, icon, title, desc) in zip(
 
 
 # ==========================================================
-# SETTINGS — SIDEBAR (desktop) + MOBILE EXPANDER (mobile)
-# ============================================================
-
-# ---------- Sidebar (desktop) ----------
+# SIDEBAR SETTINGS
+# ==========================================================
 with st.sidebar:
     st.markdown("### ⚙️ Analysis Settings")
     st.caption("Tune how sensitive the AI should be.")
@@ -172,10 +159,8 @@ with st.sidebar:
                 "⚖️ Compare Both"
             ],
             index=0,
-            help="Compare mode runs both engines side-by-side.",
-            key="sidebar_engine"
+            help="Compare mode runs both engines side-by-side."
         )
-        st.session_state.analysis_mode = analysis_mode
 
         if "Deep Learning" in analysis_mode or "Compare" in analysis_mode:
             modality_choice = st.selectbox(
@@ -188,35 +173,25 @@ with st.sidebar:
                     "🦴 Bone Scan"
                 ],
                 index=0,
-                help="Auto-detect uses the trained modality classifier.",
-                key="sidebar_modality"
+                help="Auto-detect uses the trained modality classifier."
             )
         else:
-            modality_choice = st.session_state.modality_choice
-        st.session_state.modality_choice = modality_choice
+            modality_choice = "🌐 Auto-detect"
     else:
-        analysis_mode = st.session_state.analysis_mode
-        modality_choice = st.session_state.modality_choice
+        analysis_mode = "⚡ Statistical (fast)"
+        modality_choice = "🌐 Auto-detect"
 
     sensitivity = st.slider(
         "Detection Sensitivity",
         min_value=0.3, max_value=0.9, value=0.65, step=0.05,
-        help="Higher = more detections (may include false positives)",
-        key="sidebar_sensitivity"
+        help="Higher = more detections (may include false positives)"
     )
-    st.session_state.sensitivity = sensitivity
-
     block_size = st.select_slider(
         "Analysis Block Size",
         options=[16, 32, 64], value=32,
-        help="Smaller = more detailed, slower",
-        key="sidebar_block"
+        help="Smaller = more detailed, slower"
     )
-    st.session_state.block_size = block_size
-
-    show_boxes = st.checkbox("Show bounding boxes", value=True,
-                              key="sidebar_boxes")
-    st.session_state.show_boxes = show_boxes
+    show_boxes = st.checkbox("Show bounding boxes", value=True)
 
     st.divider()
     st.markdown("### 📊 Session Stats")
@@ -235,67 +210,6 @@ with st.sidebar:
 
     st.divider()
     st.caption("Python • OpenCV • ONNX • Streamlit")
-
-
-# ---------- Mobile-only settings expander ----------
-st.markdown('<div class="mobile-settings">', unsafe_allow_html=True)
-
-with st.expander("⚙️ Analysis Settings (tap to open)", expanded=False):
-    st.caption("Same settings as the sidebar — for mobile use.")
-
-    if DL_AVAILABLE:
-        analysis_mode_m = st.radio(
-            "AI Engine",
-            options=[
-                "⚡ Statistical (fast)",
-                "🧠 Deep Learning (accurate)",
-                "⚖️ Compare Both"
-            ],
-            index=0,
-            key="mobile_engine"
-        )
-        # Sync to session state
-        st.session_state.analysis_mode = analysis_mode_m
-        analysis_mode = analysis_mode_m
-
-        if "Deep Learning" in analysis_mode_m or "Compare" in analysis_mode_m:
-            modality_choice_m = st.selectbox(
-                "Modality",
-                options=[
-                    "🌐 Auto-detect",
-                    "🩻 Chest X-ray",
-                    "🧠 Brain MRI",
-                    "🫁 Chest CT",
-                    "🦴 Bone Scan"
-                ],
-                index=0,
-                key="mobile_modality"
-            )
-            st.session_state.modality_choice = modality_choice_m
-            modality_choice = modality_choice_m
-
-    sensitivity_m = st.slider(
-        "Detection Sensitivity",
-        min_value=0.3, max_value=0.9, value=0.65, step=0.05,
-        key="mobile_sensitivity"
-    )
-    st.session_state.sensitivity = sensitivity_m
-    sensitivity = sensitivity_m
-
-    block_size_m = st.select_slider(
-        "Analysis Block Size",
-        options=[16, 32, 64], value=32,
-        key="mobile_block"
-    )
-    st.session_state.block_size = block_size_m
-    block_size = block_size_m
-
-    show_boxes_m = st.checkbox("Show bounding boxes", value=True,
-                                key="mobile_boxes")
-    st.session_state.show_boxes = show_boxes_m
-    show_boxes = show_boxes_m
-
-st.markdown('</div>', unsafe_allow_html=True)
 
 
 # ---------- Disclaimer + Live Stats Row ----------
@@ -386,7 +300,10 @@ if uploaded_file is not None:
         file_bytes = uploaded_file.read()
         start_time = time.time()
 
-        with st.spinner(f"Analyzing with {analysis_mode}..."):
+        # Capture the current mode at analysis time
+        current_mode = analysis_mode
+
+        with st.spinner(f"Analyzing with {current_mode}..."):
             original, enhanced, normalized = preprocess(file_bytes)
 
             modality_map = {
@@ -416,7 +333,7 @@ if uploaded_file is not None:
             report_dl = None
             dl_time = 0
 
-            if DL_AVAILABLE and ("Deep Learning" in analysis_mode or "Compare" in analysis_mode):
+            if DL_AVAILABLE and ("Deep Learning" in current_mode or "Compare" in current_mode):
                 dl_start = time.time()
                 anomaly_map_dl = detect_anomalies_dl(enhanced, modality=selected_modality)
                 if anomaly_map_dl is not None:
@@ -428,11 +345,11 @@ if uploaded_file is not None:
                 dl_time = time.time() - dl_start
 
             # ---- Primary result ----
-            if "Compare" in analysis_mode and anomaly_map_dl is not None:
+            if "Compare" in current_mode and anomaly_map_dl is not None:
                 anomaly_map, regions, raw_heat, overlay, report = (
                     anomaly_map_dl, regions_dl, heat_dl, overlay_dl, report_dl
                 )
-            elif "Deep Learning" in analysis_mode and anomaly_map_dl is not None:
+            elif "Deep Learning" in current_mode and anomaly_map_dl is not None:
                 anomaly_map, regions, raw_heat, overlay, report = (
                     anomaly_map_dl, regions_dl, heat_dl, overlay_dl, report_dl
                 )
@@ -443,15 +360,16 @@ if uploaded_file is not None:
 
         analysis_duration = time.time() - start_time
 
+        # Store results
         st.session_state.original = original
         st.session_state.processed = enhanced
         st.session_state.heatmap = raw_heat
         st.session_state.overlay = overlay
         st.session_state.regions = regions
         st.session_state.report = report
-        st.session_state.analysis_mode = analysis_mode
+        st.session_state.analysis_mode = current_mode
+        st.session_state.compare_mode = "Compare" in current_mode
 
-        st.session_state.compare_mode = "Compare" in analysis_mode
         st.session_state.stat_results = {
             "regions": regions_stat,
             "heat": heat_stat,
@@ -468,8 +386,8 @@ if uploaded_file is not None:
         } if anomaly_map_dl is not None else None
 
         engine_label = (
-            "DL" if "Deep Learning" in analysis_mode
-            else ("Compare" if "Compare" in analysis_mode else "Statistical")
+            "DL" if "Deep Learning" in current_mode
+            else ("Compare" if "Compare" in current_mode else "Statistical")
         )
         modality_label = selected_modality if selected_modality != "auto" else "auto-detect"
 
@@ -487,7 +405,11 @@ if uploaded_file is not None:
     if st.session_state.get("original") is not None:
 
         # ========== COMPARE MODE ==========
-        if st.session_state.get("compare_mode", False) and st.session_state.get("dl_results") is not None:
+        stored_mode = st.session_state.get("analysis_mode", "")
+        is_compare = st.session_state.get("compare_mode", False) or "Compare" in stored_mode
+        has_dl = st.session_state.get("dl_results") is not None
+
+        if is_compare and has_dl:
             st.divider()
             st.markdown(
                 '<div class="section-header">'
@@ -562,7 +484,7 @@ if uploaded_file is not None:
                 '<div class="section-header">'
                 '<span class="section-header-icon">🖼️</span>'
                 '<div><h2 class="section-header-text">Analysis Results</h2>'
-                f'<p class="section-header-desc">Engine: {st.session_state.get("analysis_mode", "Statistical")}</p></div>'
+                f'<p class="section-header-desc">Engine: {stored_mode or "Statistical"}</p></div>'
                 '</div>',
                 unsafe_allow_html=True
             )
