@@ -14,23 +14,36 @@ def load_image(file_bytes):
     Handles DICOM, PNG, JPG, JPEG.
     Returns grayscale uint8 numpy array.
     """
-    # Try DICOM first
-    if is_dicom(file_bytes):
-        dicom_img = load_dicom(file_bytes)
-        if dicom_img is not None:
-            return dicom_img
-    
-    # Fallback to PIL (PNG/JPG)
+
+    # ---- Try DICOM first (only if it really looks like DICOM) ----
+    try:
+        if is_dicom(file_bytes):
+            dicom_img = load_dicom(file_bytes)
+            if dicom_img is not None and dicom_img.size > 0:
+                return dicom_img
+    except Exception:
+        pass  # Not DICOM, continue
+
+    # ---- Try PIL (PNG/JPG) ----
     try:
         pil_img = Image.open(io.BytesIO(file_bytes)).convert("L")
-        return np.array(pil_img, dtype=np.uint8)
+        arr = np.array(pil_img, dtype=np.uint8)
+        if arr.size > 0:
+            return arr
     except Exception:
-        # Last try: cv2
+        pass  # Not PIL-readable
+
+    # ---- Try OpenCV (last resort) ----
+    try:
         arr = np.frombuffer(file_bytes, np.uint8)
         img = cv2.imdecode(arr, cv2.IMREAD_GRAYSCALE)
-        if img is None:
-            raise ValueError("Could not load image")
-        return img
+        if img is not None and img.size > 0:
+            return img
+    except Exception:
+        pass
+
+    # ---- All failed ----
+    raise ValueError("Could not load image. Unsupported format or corrupted file.")
 
 
 def resize_image(img):
