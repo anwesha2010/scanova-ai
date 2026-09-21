@@ -8,7 +8,8 @@ def init_analytics():
         st.session_state.scan_history = []
 
 
-def record_scan(filename, regions, status, level, duration):
+def record_scan(filename, regions, status, level, duration,
+                modality="unknown", engine="statistical"):
     """Record one analysis in the session history."""
     init_analytics()
     st.session_state.scan_history.append({
@@ -18,6 +19,8 @@ def record_scan(filename, regions, status, level, duration):
         "status": status,
         "level": level,
         "duration": round(duration, 2),
+        "modality": modality,
+        "engine": engine,
     })
 
 

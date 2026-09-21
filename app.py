@@ -348,7 +348,7 @@ if uploaded_file is not None:
 
         analysis_duration = time.time() - start_time
 
-        # Store everything
+        # Store in session state
         st.session_state.original = original
         st.session_state.processed = enhanced
         st.session_state.heatmap = raw_heat
@@ -373,12 +373,21 @@ if uploaded_file is not None:
             "time": dl_time,
         } if anomaly_map_dl is not None else None
 
+        # ---- Record in analytics with engine + modality ----
+        engine_label = (
+            "DL" if "Deep Learning" in analysis_mode
+            else ("Compare" if "Compare" in analysis_mode else "Statistical")
+        )
+        modality_label = selected_modality if selected_modality != "auto" else "auto-detect"
+
         record_scan(
             filename=uploaded_file.name,
             regions=report["regions_found"],
             status=report["status"],
             level=report["level"],
-            duration=analysis_duration
+            duration=analysis_duration,
+            modality=modality_label,
+            engine=engine_label
         )
 
     # ---------- Display Results ----------
