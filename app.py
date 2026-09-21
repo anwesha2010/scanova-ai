@@ -292,7 +292,6 @@ if uploaded_file is not None:
         with st.spinner(f"Analyzing with {analysis_mode}..."):
             original, enhanced, normalized = preprocess(file_bytes)
 
-            # Modality map
             modality_map = {
                 "🌐 Auto-detect": "auto",
                 "🩻 Chest X-ray": "chest_xray",
@@ -405,29 +404,55 @@ if uploaded_file is not None:
             stat = st.session_state.stat_results
             dl = st.session_state.dl_results
 
-            col_stat, col_dl = st.columns(2)
+            # Mobile toggle
+            stack_compare = st.toggle("📱 Stack vertically (mobile view)", value=False)
 
-            with col_stat:
+            if stack_compare:
+                # Stacked layout — better for mobile
                 st.markdown("### ⚡ Statistical Engine")
                 st.image(stat["overlay"], use_container_width=True,
                          caption="Detection Overlay")
-                c1, c2 = st.columns(2)
+                c1, c2, c3, c4 = st.columns(4)
                 c1.metric("Regions", len(stat["regions"]))
                 c2.metric("Time", f"{stat['time']:.2f}s")
-                c3, c4 = st.columns(2)
                 c3.metric("Affected", f"{stat['report']['affected_area_percent']}%")
                 c4.metric("Status", stat["report"]["level"].upper())
 
-            with col_dl:
+                st.divider()
+
                 st.markdown("### 🧠 Deep Learning Engine")
                 st.image(dl["overlay"], use_container_width=True,
                          caption="Detection Overlay")
-                c1, c2 = st.columns(2)
+                c1, c2, c3, c4 = st.columns(4)
                 c1.metric("Regions", len(dl["regions"]))
                 c2.metric("Time", f"{dl['time']:.2f}s")
-                c3, c4 = st.columns(2)
                 c3.metric("Affected", f"{dl['report']['affected_area_percent']}%")
                 c4.metric("Status", dl["report"]["level"].upper())
+            else:
+                # Side-by-side layout (desktop)
+                col_stat, col_dl = st.columns(2)
+
+                with col_stat:
+                    st.markdown("### ⚡ Statistical Engine")
+                    st.image(stat["overlay"], use_container_width=True,
+                             caption="Detection Overlay")
+                    c1, c2 = st.columns(2)
+                    c1.metric("Regions", len(stat["regions"]))
+                    c2.metric("Time", f"{stat['time']:.2f}s")
+                    c3, c4 = st.columns(2)
+                    c3.metric("Affected", f"{stat['report']['affected_area_percent']}%")
+                    c4.metric("Status", stat["report"]["level"].upper())
+
+                with col_dl:
+                    st.markdown("### 🧠 Deep Learning Engine")
+                    st.image(dl["overlay"], use_container_width=True,
+                             caption="Detection Overlay")
+                    c1, c2 = st.columns(2)
+                    c1.metric("Regions", len(dl["regions"]))
+                    c2.metric("Time", f"{dl['time']:.2f}s")
+                    c3, c4 = st.columns(2)
+                    c3.metric("Affected", f"{dl['report']['affected_area_percent']}%")
+                    c4.metric("Status", dl["report"]["level"].upper())
 
             st.info(
                 "💡 **Statistical** is fast and rule-based. "

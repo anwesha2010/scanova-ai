@@ -1253,3 +1253,79 @@ hr {
         font-size: 0.72rem !important;
     }
 }
+/* ============================================
+   MOBILE-FIRST COLUMN STACKING
+   Forces all Streamlit columns to stack on phones
+   ============================================ */
+
+@media (max-width: 900px) {
+    /* Force all Streamlit column containers to stack */
+    [data-testid="stHorizontalBlock"] {
+        flex-direction: column !important;
+        gap: 1rem !important;
+    }
+
+    /* Each column becomes full-width */
+    [data-testid="stHorizontalBlock"] > [data-testid="column"] {
+        width: 100% !important;
+        flex: 1 1 100% !important;
+        min-width: 100% !important;
+    }
+
+    /* Compare mode: images stack and get proper width */
+    [data-testid="stImage"] img {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+
+    /* Metric cards: give them room */
+    [data-testid="stMetric"] {
+        width: 100% !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    [data-testid="stMetricValue"] {
+        font-size: 1.5rem !important;
+    }
+
+    /* Download buttons: full width, stacked */
+    .stDownloadButton > button {
+        width: 100% !important;
+        margin-bottom: 0.5rem !important;
+    }
+
+    /* File uploader: full width */
+    [data-testid="stFileUploader"] {
+        width: 100% !important;
+    }
+
+    /* Toggle: full width */
+    [data-testid="stToggle"] {
+        margin-bottom: 1rem !important;
+    }
+}
+
+/* Extra small phones (max 480px) */
+@media (max-width: 480px) {
+    /* Even tighter spacing */
+    .main .block-container {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+    }
+
+    /* Metric values even smaller */
+    [data-testid="stMetricValue"] {
+        font-size: 1.3rem !important;
+    }
+
+    /* Compare mode headings */
+    h3 {
+        font-size: 1.1rem !important;
+    }
+
+    /* Sidebar toggle spacing */
+    [data-testid="stSidebar"] {
+        min-width: 280px !important;
+        max-width: 320px !important;
+    }
+}
