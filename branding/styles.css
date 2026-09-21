@@ -1,42 +1,32 @@
 /* ============================================
    SCANOVA AI — Design System v3
-   InnoEx Competition Edition + Mobile Optimized
+   InnoEx Competition Edition
    ============================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&display=swap');
 
-/* ============================================
-   TOP GAP FIX — aggressive
-   ============================================ */
-.main .block-container,
-[data-testid="stAppViewBlockContainer"],
-.block-container {
-    padding-top: 0 !important;
-    margin-top: 0 !important;
+/* ---------- Kill Streamlit top gap ---------- */
+.main .block-container {
+    padding-top: 1rem !important;
+    padding-bottom: 4rem !important;
     max-width: 1280px;
 }
 
-[data-testid="stAppViewContainer"] > .main,
-[data-testid="stAppViewContainer"] > .main > div,
-[data-testid="stAppViewContainer"] section,
-[data-testid="stAppViewContainer"] section > div {
+[data-testid="stAppViewContainer"] > .main {
     padding-top: 0 !important;
-    margin-top: 0 !important;
 }
 
-[data-testid="stHeader"],
-header[data-testid="stHeader"] {
+[data-testid="stAppViewContainer"] section {
+    padding-top: 0 !important;
+}
+
+[data-testid="stHeader"] {
     display: none !important;
-    height: 0 !important;
-    min-height: 0 !important;
-    padding: 0 !important;
-    margin: 0 !important;
 }
 
-.main > div:first-child {
-    margin-top: 0 !important;
-    padding-top: 0 !important;
+header[data-testid="stHeader"] {
+    background: transparent !important;
+    height: 0 !important;
 }
 
 /* ---------- Base ---------- */
@@ -52,102 +42,6 @@ footer { visibility: hidden; }
 h1, h2, h3, h4 {
     color: #09090b !important;
     letter-spacing: -0.03em !important;
-}
-
-/* ============================================
-   TOP ANNOUNCEMENT BANNER
-   ============================================ */
-.top-banner {
-    background: linear-gradient(90deg, #09090b 0%, #18181b 50%, #09090b 100%);
-    background-size: 200% 100%;
-    animation: bannerShift 6s ease-in-out infinite;
-    padding: 12px 24px;
-    border-radius: 0;
-    margin: 0 -3rem 1.5rem -3rem;
-    position: relative;
-    overflow: hidden;
-}
-
-@keyframes bannerShift {
-    0%, 100% { background-position: 0% 50%; }
-    50%      { background-position: 100% 50%; }
-}
-
-.top-banner::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background:
-        radial-gradient(circle at 20% 50%, rgba(14, 165, 233, 0.25) 0%, transparent 40%),
-        radial-gradient(circle at 80% 50%, rgba(139, 92, 246, 0.2) 0%, transparent 40%);
-    pointer-events: none;
-}
-
-.top-banner-content {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 14px;
-    position: relative;
-    z-index: 1;
-    flex-wrap: wrap;
-}
-
-.top-banner-pill {
-    background: linear-gradient(135deg, #0ea5e9, #8b5cf6);
-    color: #ffffff;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 0.65rem;
-    font-weight: 800;
-    letter-spacing: 0.15em;
-    padding: 3px 10px;
-    border-radius: 100px;
-    text-transform: uppercase;
-    box-shadow: 0 0 20px rgba(14, 165, 233, 0.5);
-    animation: pillPulse 2s ease-in-out infinite;
-}
-
-@keyframes pillPulse {
-    0%, 100% { box-shadow: 0 0 20px rgba(14, 165, 233, 0.5); }
-    50%      { box-shadow: 0 0 30px rgba(14, 165, 233, 0.9); }
-}
-
-.top-banner-text {
-    font-family: 'Inter', sans-serif;
-    font-size: 0.9rem;
-    color: #a1a1aa;
-    font-weight: 500;
-    letter-spacing: -0.01em;
-}
-
-.top-banner-text strong {
-    color: #fafafa;
-    font-weight: 700;
-}
-
-.gradient-text {
-    background: linear-gradient(90deg, #0ea5e9, #8b5cf6, #ec4899);
-    background-size: 200% auto;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    font-weight: 800;
-    animation: gradientShift 4s linear infinite;
-}
-
-@keyframes gradientShift {
-    0%   { background-position: 0% center; }
-    100% { background-position: 200% center; }
-}
-
-.top-banner-arrow {
-    color: #0ea5e9;
-    font-weight: 700;
-    transition: transform 0.3s ease;
-}
-
-.top-banner:hover .top-banner-arrow {
-    transform: translateX(4px);
 }
 
 /* ============================================
@@ -197,7 +91,10 @@ h1, h2, h3, h4 {
 .hero-image-wrap::before {
     content: '';
     position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
     background:
         linear-gradient(180deg, rgba(14, 165, 233, 0.15) 0%, transparent 40%),
         linear-gradient(0deg, rgba(9, 9, 11, 0.4) 0%, transparent 60%);
@@ -296,6 +193,7 @@ h1, h2, h3, h4 {
     font-style: italic;
     font-weight: 800;
     color: #0ea5e9;
+    font-family: 'Inter', sans-serif;
 }
 
 .hero-sub {
@@ -461,15 +359,6 @@ h1, h2, h3, h4 {
     max-width: 560px;
     line-height: 1.55;
     margin: 0;
-    position: relative;
-    z-index: 1;
-}
-
-.modality-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
-    margin-top: 1.5rem;
     position: relative;
     z-index: 1;
 }
@@ -890,24 +779,9 @@ hr {
 }
 
 /* ============================================
-   RESPONSIVE — Full mobile optimization
+   RESPONSIVE — clean and minimal
    ============================================ */
 
-/* Prevent horizontal overflow on mobile */
-@media (max-width: 900px) {
-    html, body {
-        overflow-x: hidden !important;
-    }
-    [data-testid="stAppViewContainer"] {
-        overflow-x: hidden !important;
-    }
-    img {
-        max-width: 100% !important;
-        height: auto !important;
-    }
-}
-
-/* ---------- TABLETS (max 1024px) ---------- */
 @media (max-width: 1024px) {
     .hero-split {
         grid-template-columns: 1fr;
@@ -922,410 +796,48 @@ hr {
         max-width: 100%;
         transform: rotate(0deg);
     }
-    .hero-headline {
-        font-size: clamp(2rem, 5vw, 3rem) !important;
-    }
 }
 
-/* ---------- SMALL TABLETS (max 768px) ---------- */
 @media (max-width: 768px) {
     .main .block-container {
         padding-left: 1rem !important;
         padding-right: 1rem !important;
-        padding-bottom: 2rem !important;
     }
 
-    /* Banner */
     .top-banner {
         margin: 0 -1rem 1rem -1rem !important;
         padding: 10px 14px !important;
     }
-    .top-banner-content {
-        gap: 8px !important;
-        justify-content: flex-start !important;
-    }
     .top-banner-text {
-        font-size: 0.76rem !important;
-        line-height: 1.4 !important;
-    }
-    .top-banner-pill {
-        font-size: 0.58rem !important;
-        padding: 2px 8px !important;
-    }
-    .top-banner-arrow {
-        display: none !important;
+        font-size: 0.8rem !important;
     }
 
-    /* Hero */
-    .hero-split {
-        gap: 1.5rem !important;
-        padding: 0.5rem 0 1rem 0 !important;
-    }
-    .hero-image-wrap {
-        border-radius: 16px !important;
-        max-height: 320px !important;
-        aspect-ratio: auto !important;
-    }
-    .hero-image-wrap img {
-        max-height: 320px !important;
-        object-fit: cover !important;
-    }
-    .hero-image-badge {
-        padding: 5px 10px !important;
-        font-size: 0.62rem !important;
-        bottom: 12px !important;
-        left: 12px !important;
-    }
-    .hero-eyebrow {
-        font-size: 0.6rem !important;
-        padding: 5px 10px !important;
-        letter-spacing: 0.1em !important;
-        margin-bottom: 1rem !important;
-    }
     .hero-headline {
-        font-size: 1.85rem !important;
-        margin-bottom: 1rem !important;
-        line-height: 1.05 !important;
-    }
-    .hero-headline br {
-        display: none !important;
+        font-size: 1.9rem !important;
     }
     .hero-sub {
         font-size: 0.95rem !important;
-        line-height: 1.55 !important;
-        margin-bottom: 1.5rem !important;
     }
     .hero-ctas {
         flex-direction: column !important;
-        gap: 8px !important;
-        margin-bottom: 1.5rem !important;
     }
     .cta-primary,
     .cta-secondary {
         width: 100% !important;
         justify-content: center !important;
-        padding: 12px 18px !important;
-        font-size: 0.9rem !important;
     }
-    .trust-strip {
-        gap: 12px !important;
-        padding-top: 1rem !important;
+    .hero-image-wrap {
+        max-height: 320px !important;
+        aspect-ratio: auto !important;
     }
-    .trust-item {
-        font-size: 0.62rem !important;
+    .hero-image-wrap img {
+        max-height: 320px !important;
     }
-
-    /* Modality section */
     .modality-section {
         padding: 1.25rem 1.25rem !important;
-        border-radius: 14px !important;
-        margin: 1rem 0 1.5rem 0 !important;
     }
-    .modality-title {
-        font-size: 1.4rem !important;
-    }
-    .modality-desc {
-        font-size: 0.85rem !important;
-    }
-    .modality-grid {
-        grid-template-columns: 1fr !important;
-        gap: 12px !important;
-        margin-top: 1rem !important;
-    }
-    .modality-card {
-        padding: 1rem 1rem !important;
-    }
-    .modality-card-icon {
-        font-size: 1.75rem !important;
-        margin-bottom: 0.6rem !important;
-    }
-    .modality-card-number {
-        margin-bottom: 0.6rem !important;
-        font-size: 0.62rem !important;
-    }
-    .modality-card-title {
-        font-size: 1.05rem !important;
-    }
-    .modality-card-desc {
-        font-size: 0.8rem !important;
-    }
-
-    /* Live card */
-    .live-card {
-        padding: 0.9rem 1rem !important;
-        border-radius: 12px !important;
-    }
-    .live-stat-value {
-        font-size: 1rem !important;
-    }
-    .live-stat-value.accent {
-        font-size: 1.15rem !important;
-    }
-
-    /* Section headers */
-    .section-header {
-        gap: 8px !important;
-        margin: 1.5rem 0 0.75rem 0 !important;
-    }
-    .section-header-icon {
-        font-size: 1.4rem !important;
-    }
-    .section-header-text {
-        font-size: 1.2rem !important;
-    }
-    .section-header-desc {
-        font-size: 0.8rem !important;
-    }
-
-    /* Founder quote */
     .founder-quote {
         padding: 1.25rem 1.25rem !important;
         font-size: 0.95rem !important;
-        margin-top: 2.5rem !important;
-    }
-
-    /* Footer */
-    .app-footer {
-        margin-top: 2.5rem !important;
-        padding-top: 1.5rem !important;
-        font-size: 0.75rem !important;
-    }
-    .footer-badge {
-        font-size: 0.62rem !important;
-        padding: 3px 8px !important;
-    }
-
-    /* Buttons full-width */
-    .stButton > button {
-        width: 100% !important;
-    }
-}
-
-/* ---------- STANDARD PHONES (max 640px) ---------- */
-@media (max-width: 640px) {
-    .main .block-container {
-        padding-left: 0.75rem !important;
-        padding-right: 0.75rem !important;
-    }
-
-    .top-banner {
-        margin: 0 -0.75rem 0.75rem -0.75rem !important;
-        padding: 8px 10px !important;
-    }
-    .top-banner-text {
-        font-size: 0.7rem !important;
-    }
-    .top-banner-pill {
-        font-size: 0.55rem !important;
-        padding: 2px 6px !important;
-    }
-
-    .hero-headline {
-        font-size: 1.65rem !important;
-        letter-spacing: -0.03em !important;
-    }
-    .hero-sub {
-        font-size: 0.9rem !important;
-    }
-    .hero-eyebrow {
-        font-size: 0.55rem !important;
-        padding: 4px 8px !important;
-        letter-spacing: 0.08em !important;
-    }
-    .hero-image-wrap {
-        border-radius: 12px !important;
-        max-height: 260px !important;
-    }
-    .hero-image-wrap img {
-        max-height: 260px !important;
-    }
-    .hero-image-badge {
-        padding: 4px 8px !important;
-        font-size: 0.58rem !important;
-    }
-    .hero-image-badge::before {
-        width: 6px !important;
-        height: 6px !important;
-    }
-
-    .section-header-text {
-        font-size: 1.05rem !important;
-    }
-    .section-header-desc {
-        font-size: 0.75rem !important;
-    }
-
-    .modality-section {
-        padding: 1rem 1rem !important;
-    }
-    .modality-title {
-        font-size: 1.2rem !important;
-    }
-    .modality-eyebrow {
-        font-size: 0.6rem !important;
-        letter-spacing: 0.14em !important;
-    }
-
-    [data-testid="stMetric"] {
-        padding: 0.9rem 1rem !important;
-    }
-    [data-testid="stMetricValue"] {
-        font-size: 1.4rem !important;
-    }
-    [data-testid="stMetricLabel"] {
-        font-size: 0.7rem !important;
-    }
-
-    [data-testid="stExpander"] summary {
-        font-size: 0.9rem !important;
-    }
-    [data-testid="stExpander"] p {
-        font-size: 0.85rem !important;
-    }
-}
-
-/* ---------- SMALL PHONES (max 480px) ---------- */
-@media (max-width: 480px) {
-    .main .block-container {
-        padding-left: 0.5rem !important;
-        padding-right: 0.5rem !important;
-    }
-
-    .top-banner {
-        margin: 0 -0.5rem 0.5rem -0.5rem !important;
-        padding: 6px 8px !important;
-    }
-    .top-banner-text {
-        font-size: 0.65rem !important;
-        display: block !important;
-    }
-
-    .hero-headline {
-        font-size: 1.5rem !important;
-    }
-    .hero-sub {
-        font-size: 0.85rem !important;
-        line-height: 1.5 !important;
-    }
-    .cta-primary,
-    .cta-secondary {
-        padding: 10px 16px !important;
-        font-size: 0.85rem !important;
-    }
-    .hero-image-wrap {
-        max-height: 220px !important;
-    }
-    .hero-image-wrap img {
-        max-height: 220px !important;
-    }
-
-    .modality-card {
-        padding: 0.85rem 0.85rem !important;
-    }
-    .modality-card-icon {
-        font-size: 1.5rem !important;
-    }
-    .modality-card-title {
-        font-size: 0.95rem !important;
-    }
-    .modality-card-desc {
-        font-size: 0.75rem !important;
-    }
-
-    .live-card {
-        padding: 0.75rem 0.85rem !important;
-    }
-    .live-stat-label {
-        font-size: 0.72rem !important;
-    }
-    .live-stat-value {
-        font-size: 0.9rem !important;
-    }
-    .live-stat-value.accent {
-        font-size: 1rem !important;
-    }
-
-    .founder-quote {
-        padding: 1rem 1rem !important;
-        font-size: 0.85rem !important;
-    }
-    .founder-quote .attr {
-        font-size: 0.72rem !important;
-    }
-}
-/* ============================================
-   MOBILE-FIRST COLUMN STACKING
-   Forces all Streamlit columns to stack on phones
-   ============================================ */
-
-@media (max-width: 900px) {
-    /* Force all Streamlit column containers to stack */
-    [data-testid="stHorizontalBlock"] {
-        flex-direction: column !important;
-        gap: 1rem !important;
-    }
-
-    /* Each column becomes full-width */
-    [data-testid="stHorizontalBlock"] > [data-testid="column"] {
-        width: 100% !important;
-        flex: 1 1 100% !important;
-        min-width: 100% !important;
-    }
-
-    /* Compare mode: images stack and get proper width */
-    [data-testid="stImage"] img {
-        max-width: 100% !important;
-        height: auto !important;
-    }
-
-    /* Metric cards: give them room */
-    [data-testid="stMetric"] {
-        width: 100% !important;
-        margin-bottom: 0.5rem !important;
-    }
-
-    [data-testid="stMetricValue"] {
-        font-size: 1.5rem !important;
-    }
-
-    /* Download buttons: full width, stacked */
-    .stDownloadButton > button {
-        width: 100% !important;
-        margin-bottom: 0.5rem !important;
-    }
-
-    /* File uploader: full width */
-    [data-testid="stFileUploader"] {
-        width: 100% !important;
-    }
-
-    /* Toggle: full width */
-    [data-testid="stToggle"] {
-        margin-bottom: 1rem !important;
-    }
-}
-
-/* Extra small phones (max 480px) */
-@media (max-width: 480px) {
-    /* Even tighter spacing */
-    .main .block-container {
-        padding-left: 0.75rem !important;
-        padding-right: 0.75rem !important;
-    }
-
-    /* Metric values even smaller */
-    [data-testid="stMetricValue"] {
-        font-size: 1.3rem !important;
-    }
-
-    /* Compare mode headings */
-    h3 {
-        font-size: 1.1rem !important;
-    }
-
-    /* Sidebar toggle spacing */
-    [data-testid="stSidebar"] {
-        min-width: 280px !important;
-        max-width: 320px !important;
     }
 }
