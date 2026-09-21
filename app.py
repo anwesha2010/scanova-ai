@@ -36,6 +36,27 @@ st.set_page_config(
 
 init_analytics()
 
+# Initialize session state for settings
+if "analysis_mode" not in st.session_state:
+    st.session_state.analysis_mode = "⚡ Statistical (fast)"
+if "modality_choice" not in st.session_state:
+    st.session_state.modality_choice = "🌐 Auto-detect"
+if "sensitivity" not in st.session_state:
+    st.session_state.sensitivity = 0.65
+if "block_size" not in st.session_state:
+    st.session_state.block_size = 32
+if "show_boxes" not in st.session_state:
+    st.session_state.show_boxes = True
+
+if "compare_mode" not in st.session_state:
+    st.session_state.compare_mode = False
+if "stat_results" not in st.session_state:
+    st.session_state.stat_results = None
+if "dl_results" not in st.session_state:
+    st.session_state.dl_results = None
+if "original" not in st.session_state:
+    st.session_state.original = None
+
 
 # ---------- Load Custom CSS ----------
 try:
@@ -133,32 +154,15 @@ for col, (cls, num, icon, title, desc) in zip(
         )
 
 
-# ---------- Disclaimer + Live Stats Row ----------
-col_left, col_right = st.columns([3, 1])
+# ==========================================================
+# SETTINGS — SIDEBAR (desktop) + MOBILE EXPANDER (mobile)
+# ============================================================
 
-with col_left:
-    st.warning(
-        "⚠️ **Assistive tool only.** This does not replace professional medical "
-        "diagnosis. Always consult a qualified radiologist for clinical decisions."
-    )
-
-with col_right:
-    st.markdown(f"""
-<div class="live-card">
-<div class="live-card-header"><span class="live-card-title">Live Session</span><span class="live-pulse">Active</span></div>
-<div class="live-stat-row"><span class="live-stat-label">Scans this session</span><span class="live-stat-value accent">{hero_stats['total']}</span></div>
-<div class="live-stat-row"><span class="live-stat-label">Avg analysis time</span><span class="live-stat-value">{hero_stats['avg_time']}s</span></div>
-<div class="live-stat-row"><span class="live-stat-label">Safe / Warn / Danger</span><span class="live-stat-value" style="font-size: 1rem;">{hero_stats['safe']} / {hero_stats['warning']} / {hero_stats['danger']}</span></div>
-</div>
-""", unsafe_allow_html=True)
-
-
-# ---------- Sidebar ----------
+# ---------- Sidebar (desktop) ----------
 with st.sidebar:
     st.markdown("### ⚙️ Analysis Settings")
     st.caption("Tune how sensitive the AI should be.")
 
-    # ============ AI Engine ============
     if DL_AVAILABLE:
         analysis_mode = st.radio(
             "AI Engine",
@@ -168,8 +172,10 @@ with st.sidebar:
                 "⚖️ Compare Both"
             ],
             index=0,
-            help="Compare mode runs both engines side-by-side."
+            help="Compare mode runs both engines side-by-side.",
+            key="sidebar_engine"
         )
+        st.session_state.analysis_mode = analysis_mode
 
         if "Deep Learning" in analysis_mode or "Compare" in analysis_mode:
             modality_choice = st.selectbox(
@@ -182,25 +188,35 @@ with st.sidebar:
                     "🦴 Bone Scan"
                 ],
                 index=0,
-                help="Auto-detect uses the trained modality classifier."
+                help="Auto-detect uses the trained modality classifier.",
+                key="sidebar_modality"
             )
         else:
-            modality_choice = "🌐 Auto-detect"
+            modality_choice = st.session_state.modality_choice
+        st.session_state.modality_choice = modality_choice
     else:
-        analysis_mode = "⚡ Statistical (fast)"
-        modality_choice = "🌐 Auto-detect"
+        analysis_mode = st.session_state.analysis_mode
+        modality_choice = st.session_state.modality_choice
 
     sensitivity = st.slider(
         "Detection Sensitivity",
         min_value=0.3, max_value=0.9, value=0.65, step=0.05,
-        help="Higher = more detections (may include false positives)"
+        help="Higher = more detections (may include false positives)",
+        key="sidebar_sensitivity"
     )
+    st.session_state.sensitivity = sensitivity
+
     block_size = st.select_slider(
         "Analysis Block Size",
         options=[16, 32, 64], value=32,
-        help="Smaller = more detailed, slower"
+        help="Smaller = more detailed, slower",
+        key="sidebar_block"
     )
-    show_boxes = st.checkbox("Show bounding boxes", value=True)
+    st.session_state.block_size = block_size
+
+    show_boxes = st.checkbox("Show bounding boxes", value=True,
+                              key="sidebar_boxes")
+    st.session_state.show_boxes = show_boxes
 
     st.divider()
     st.markdown("### 📊 Session Stats")
@@ -219,6 +235,87 @@ with st.sidebar:
 
     st.divider()
     st.caption("Python • OpenCV • ONNX • Streamlit")
+
+
+# ---------- Mobile-only settings expander ----------
+st.markdown('<div class="mobile-settings">', unsafe_allow_html=True)
+
+with st.expander("⚙️ Analysis Settings (tap to open)", expanded=False):
+    st.caption("Same settings as the sidebar — for mobile use.")
+
+    if DL_AVAILABLE:
+        analysis_mode_m = st.radio(
+            "AI Engine",
+            options=[
+                "⚡ Statistical (fast)",
+                "🧠 Deep Learning (accurate)",
+                "⚖️ Compare Both"
+            ],
+            index=0,
+            key="mobile_engine"
+        )
+        # Sync to session state
+        st.session_state.analysis_mode = analysis_mode_m
+        analysis_mode = analysis_mode_m
+
+        if "Deep Learning" in analysis_mode_m or "Compare" in analysis_mode_m:
+            modality_choice_m = st.selectbox(
+                "Modality",
+                options=[
+                    "🌐 Auto-detect",
+                    "🩻 Chest X-ray",
+                    "🧠 Brain MRI",
+                    "🫁 Chest CT",
+                    "🦴 Bone Scan"
+                ],
+                index=0,
+                key="mobile_modality"
+            )
+            st.session_state.modality_choice = modality_choice_m
+            modality_choice = modality_choice_m
+
+    sensitivity_m = st.slider(
+        "Detection Sensitivity",
+        min_value=0.3, max_value=0.9, value=0.65, step=0.05,
+        key="mobile_sensitivity"
+    )
+    st.session_state.sensitivity = sensitivity_m
+    sensitivity = sensitivity_m
+
+    block_size_m = st.select_slider(
+        "Analysis Block Size",
+        options=[16, 32, 64], value=32,
+        key="mobile_block"
+    )
+    st.session_state.block_size = block_size_m
+    block_size = block_size_m
+
+    show_boxes_m = st.checkbox("Show bounding boxes", value=True,
+                                key="mobile_boxes")
+    st.session_state.show_boxes = show_boxes_m
+    show_boxes = show_boxes_m
+
+st.markdown('</div>', unsafe_allow_html=True)
+
+
+# ---------- Disclaimer + Live Stats Row ----------
+col_left, col_right = st.columns([3, 1])
+
+with col_left:
+    st.warning(
+        "⚠️ **Assistive tool only.** This does not replace professional medical "
+        "diagnosis. Always consult a qualified radiologist for clinical decisions."
+    )
+
+with col_right:
+    st.markdown(f"""
+<div class="live-card">
+<div class="live-card-header"><span class="live-card-title">Live Session</span><span class="live-pulse">Active</span></div>
+<div class="live-stat-row"><span class="live-stat-label">Scans this session</span><span class="live-stat-value accent">{hero_stats['total']}</span></div>
+<div class="live-stat-row"><span class="live-stat-label">Avg analysis time</span><span class="live-stat-value">{hero_stats['avg_time']}s</span></div>
+<div class="live-stat-row"><span class="live-stat-label">Safe / Warn / Danger</span><span class="live-stat-value" style="font-size: 1rem;">{hero_stats['safe']} / {hero_stats['warning']} / {hero_stats['danger']}</span></div>
+</div>
+""", unsafe_allow_html=True)
 
 
 # ---------- Upload Section ----------
@@ -387,10 +484,10 @@ if uploaded_file is not None:
         )
 
     # ---------- Display Results ----------
-    if "original" in st.session_state and st.session_state.original is not None:
+    if st.session_state.get("original") is not None:
 
         # ========== COMPARE MODE ==========
-        if st.session_state.get("compare_mode", False) and st.session_state.get("dl_results"):
+        if st.session_state.get("compare_mode", False) and st.session_state.get("dl_results") is not None:
             st.divider()
             st.markdown(
                 '<div class="section-header">'
@@ -404,11 +501,9 @@ if uploaded_file is not None:
             stat = st.session_state.stat_results
             dl = st.session_state.dl_results
 
-            # Mobile toggle
             stack_compare = st.toggle("📱 Stack vertically (mobile view)", value=False)
 
             if stack_compare:
-                # Stacked layout — better for mobile
                 st.markdown("### ⚡ Statistical Engine")
                 st.image(stat["overlay"], use_container_width=True,
                          caption="Detection Overlay")
@@ -429,7 +524,6 @@ if uploaded_file is not None:
                 c3.metric("Affected", f"{dl['report']['affected_area_percent']}%")
                 c4.metric("Status", dl["report"]["level"].upper())
             else:
-                # Side-by-side layout (desktop)
                 col_stat, col_dl = st.columns(2)
 
                 with col_stat:

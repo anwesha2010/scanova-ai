@@ -1,38 +1,21 @@
 /* ============================================
-   SCANOVA AI — Design System v3
-   InnoEx Competition Edition
+   SCANOVA AI — Design System v3 (Clean + Mobile)
    ============================================ */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap');
 
-/* ---------- Kill Streamlit top gap ---------- */
-.main .block-container {
-    padding-top: 1rem !important;
-    padding-bottom: 4rem !important;
-    max-width: 1280px;
-}
-
-[data-testid="stAppViewContainer"] > .main {
-    padding-top: 0 !important;
-}
-
-[data-testid="stAppViewContainer"] section {
-    padding-top: 0 !important;
-}
-
-[data-testid="stHeader"] {
-    display: none !important;
-}
-
-header[data-testid="stHeader"] {
-    background: transparent !important;
-    height: 0 !important;
-}
-
-/* ---------- Base ---------- */
+/* ============================================
+   BASE
+   ============================================ */
 html, body, [class*="css"] {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
     background: #fafafa;
+}
+
+.main .block-container {
+    padding-top: 0 !important;
+    padding-bottom: 4rem !important;
+    max-width: 1280px;
 }
 
 #MainMenu { visibility: hidden; }
@@ -42,6 +25,97 @@ footer { visibility: hidden; }
 h1, h2, h3, h4 {
     color: #09090b !important;
     letter-spacing: -0.03em !important;
+}
+
+/* ============================================
+   SIDEBAR TOGGLE — visible everywhere
+   ============================================ */
+[data-testid="stSidebarCollapsedControl"],
+[data-testid="collapsedControl"] {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 1000 !important;
+}
+
+/* ============================================
+   TOP ANNOUNCEMENT BANNER — forced styling
+   ============================================ */
+.top-banner,
+div.top-banner {
+    background: linear-gradient(90deg, #09090b 0%, #18181b 50%, #09090b 100%) !important;
+    background-size: 200% 100% !important;
+    animation: bannerShift 6s ease-in-out infinite !important;
+    padding: 12px 24px !important;
+    color: #ffffff !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    display: block !important;
+    position: relative !important;
+    overflow: hidden !important;
+    margin: 0 0 1.5rem 0 !important;
+    border-radius: 0 !important;
+}
+
+@keyframes bannerShift {
+    0%, 100% { background-position: 0% 50%; }
+    50%      { background-position: 100% 50%; }
+}
+
+.top-banner-content,
+div.top-banner-content {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 14px !important;
+    flex-wrap: wrap !important;
+    position: relative !important;
+    z-index: 1 !important;
+}
+
+.top-banner-pill,
+span.top-banner-pill {
+    background: linear-gradient(135deg, #0ea5e9, #8b5cf6) !important;
+    color: #ffffff !important;
+    font-family: 'JetBrains Mono', monospace !important;
+    font-size: 0.65rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.15em !important;
+    padding: 3px 10px !important;
+    border-radius: 100px !important;
+    text-transform: uppercase !important;
+    display: inline-block !important;
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.5) !important;
+}
+
+.top-banner-text,
+span.top-banner-text {
+    font-family: 'Inter', sans-serif !important;
+    font-size: 0.9rem !important;
+    color: #a1a1aa !important;
+    font-weight: 500 !important;
+    letter-spacing: -0.01em !important;
+}
+
+.top-banner-text strong {
+    color: #fafafa !important;
+    font-weight: 700 !important;
+}
+
+.gradient-text,
+span.gradient-text {
+    background: linear-gradient(90deg, #0ea5e9, #8b5cf6, #ec4899) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+    font-weight: 800 !important;
+}
+
+.top-banner-arrow,
+span.top-banner-arrow {
+    color: #0ea5e9 !important;
+    font-weight: 700 !important;
+    transition: transform 0.3s ease !important;
 }
 
 /* ============================================
@@ -91,10 +165,7 @@ h1, h2, h3, h4 {
 .hero-image-wrap::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     background:
         linear-gradient(180deg, rgba(14, 165, 233, 0.15) 0%, transparent 40%),
         linear-gradient(0deg, rgba(9, 9, 11, 0.4) 0%, transparent 60%);
@@ -109,10 +180,6 @@ h1, h2, h3, h4 {
     display: block;
     filter: saturate(1.05) contrast(1.05);
     transition: transform 0.6s ease;
-}
-
-.hero-image-wrap:hover img {
-    transform: scale(1.04);
 }
 
 .hero-image-badge {
@@ -193,7 +260,6 @@ h1, h2, h3, h4 {
     font-style: italic;
     font-weight: 800;
     color: #0ea5e9;
-    font-family: 'Inter', sans-serif;
 }
 
 .hero-sub {
@@ -288,7 +354,7 @@ h1, h2, h3, h4 {
 }
 
 /* ============================================
-   MODALITY SECTION — premium dark grid
+   MODALITY SECTION
    ============================================ */
 .modality-section {
     background: linear-gradient(135deg, #09090b 0%, #18181b 100%);
@@ -307,18 +373,6 @@ h1, h2, h3, h4 {
     width: 400px;
     height: 400px;
     background: radial-gradient(circle, rgba(14, 165, 233, 0.15) 0%, transparent 70%);
-    border-radius: 50%;
-    pointer-events: none;
-}
-
-.modality-section::after {
-    content: '';
-    position: absolute;
-    bottom: -150px;
-    left: -100px;
-    width: 500px;
-    height: 500px;
-    background: radial-gradient(circle, rgba(249, 115, 22, 0.08) 0%, transparent 70%);
     border-radius: 50%;
     pointer-events: none;
 }
@@ -560,7 +614,7 @@ h1, h2, h3, h4 {
 }
 
 /* ============================================
-   SECTIONS
+   SECTION HEADERS
    ============================================ */
 .section-header {
     display: flex;
@@ -779,9 +833,38 @@ hr {
 }
 
 /* ============================================
-   RESPONSIVE — clean and minimal
+   MOBILE SETTINGS EXPANDER
+   ============================================ */
+.mobile-settings {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    .mobile-settings {
+        display: block;
+        margin: 1rem 0 1.5rem 0;
+    }
+}
+
+/* ============================================
+   RESPONSIVE — minimal and safe
    ============================================ */
 
+/* Prevent horizontal scroll on mobile */
+@media (max-width: 900px) {
+    html, body {
+        overflow-x: hidden !important;
+    }
+    [data-testid="stAppViewContainer"] {
+        overflow-x: hidden !important;
+    }
+    img {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+}
+
+/* Tablets and below — hero stacks */
 @media (max-width: 1024px) {
     .hero-split {
         grid-template-columns: 1fr;
@@ -798,46 +881,211 @@ hr {
     }
 }
 
+/* Small tablets / large phones */
 @media (max-width: 768px) {
     .main .block-container {
         padding-left: 1rem !important;
         padding-right: 1rem !important;
+        padding-bottom: 2rem !important;
     }
 
     .top-banner {
         margin: 0 -1rem 1rem -1rem !important;
         padding: 10px 14px !important;
     }
+    .top-banner-content {
+        gap: 8px !important;
+        justify-content: flex-start !important;
+    }
     .top-banner-text {
-        font-size: 0.8rem !important;
+        font-size: 0.76rem !important;
+        line-height: 1.4 !important;
+    }
+    .top-banner-pill {
+        font-size: 0.58rem !important;
+        padding: 2px 8px !important;
+    }
+    .top-banner-arrow {
+        display: none !important;
     }
 
-    .hero-headline {
-        font-size: 1.9rem !important;
-    }
-    .hero-sub {
-        font-size: 0.95rem !important;
-    }
-    .hero-ctas {
-        flex-direction: column !important;
-    }
-    .cta-primary,
-    .cta-secondary {
-        width: 100% !important;
-        justify-content: center !important;
+    .hero-split {
+        gap: 1.5rem !important;
+        padding: 0.5rem 0 1rem 0 !important;
     }
     .hero-image-wrap {
+        border-radius: 16px !important;
         max-height: 320px !important;
         aspect-ratio: auto !important;
     }
     .hero-image-wrap img {
         max-height: 320px !important;
+        object-fit: cover !important;
     }
+    .hero-image-badge {
+        padding: 5px 10px !important;
+        font-size: 0.62rem !important;
+        bottom: 12px !important;
+        left: 12px !important;
+    }
+    .hero-eyebrow {
+        font-size: 0.6rem !important;
+        padding: 5px 10px !important;
+        letter-spacing: 0.1em !important;
+        margin-bottom: 1rem !important;
+    }
+    .hero-headline {
+        font-size: 1.85rem !important;
+        margin-bottom: 1rem !important;
+        line-height: 1.05 !important;
+    }
+    .hero-headline br {
+        display: none !important;
+    }
+    .hero-sub {
+        font-size: 0.95rem !important;
+        line-height: 1.55 !important;
+        margin-bottom: 1.5rem !important;
+    }
+    .hero-ctas {
+        flex-direction: column !important;
+        gap: 8px !important;
+        margin-bottom: 1.5rem !important;
+    }
+    .cta-primary,
+    .cta-secondary {
+        width: 100% !important;
+        justify-content: center !important;
+        padding: 12px 18px !important;
+        font-size: 0.9rem !important;
+    }
+    .trust-strip {
+        gap: 12px !important;
+        padding-top: 1rem !important;
+    }
+    .trust-item {
+        font-size: 0.62rem !important;
+    }
+
     .modality-section {
         padding: 1.25rem 1.25rem !important;
+        border-radius: 14px !important;
+        margin: 1rem 0 1.5rem 0 !important;
     }
+    .modality-title {
+        font-size: 1.4rem !important;
+    }
+    .modality-desc {
+        font-size: 0.85rem !important;
+    }
+    .modality-card {
+        padding: 1rem 1rem !important;
+        margin-bottom: 0.75rem !important;
+    }
+    .modality-card-icon {
+        font-size: 1.75rem !important;
+        margin-bottom: 0.6rem !important;
+    }
+    .modality-card-number {
+        margin-bottom: 0.6rem !important;
+        font-size: 0.62rem !important;
+    }
+    .modality-card-title {
+        font-size: 1.05rem !important;
+    }
+    .modality-card-desc {
+        font-size: 0.8rem !important;
+    }
+
+    .live-card {
+        padding: 0.9rem 1rem !important;
+        border-radius: 12px !important;
+    }
+    .live-stat-value {
+        font-size: 1rem !important;
+    }
+    .live-stat-value.accent {
+        font-size: 1.15rem !important;
+    }
+
+    .section-header {
+        gap: 8px !important;
+        margin: 1.5rem 0 0.75rem 0 !important;
+    }
+    .section-header-icon {
+        font-size: 1.4rem !important;
+    }
+    .section-header-text {
+        font-size: 1.2rem !important;
+    }
+    .section-header-desc {
+        font-size: 0.8rem !important;
+    }
+
     .founder-quote {
         padding: 1.25rem 1.25rem !important;
         font-size: 0.95rem !important;
+        margin-top: 2.5rem !important;
+    }
+
+    .app-footer {
+        margin-top: 2.5rem !important;
+        padding-top: 1.5rem !important;
+        font-size: 0.75rem !important;
+    }
+    .footer-badge {
+        font-size: 0.62rem !important;
+        padding: 3px 8px !important;
+    }
+
+    .stButton > button {
+        width: 100% !important;
+    }
+}
+
+/* Small phones */
+@media (max-width: 480px) {
+    .main .block-container {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+    }
+
+    .top-banner {
+        margin: 0 -0.75rem 0.75rem -0.75rem !important;
+        padding: 8px 10px !important;
+    }
+    .top-banner-text {
+        font-size: 0.7rem !important;
+    }
+    .top-banner-pill {
+        font-size: 0.55rem !important;
+        padding: 2px 6px !important;
+    }
+
+    .hero-headline {
+        font-size: 1.65rem !important;
+    }
+    .hero-sub {
+        font-size: 0.9rem !important;
+    }
+    .hero-image-wrap {
+        max-height: 260px !important;
+    }
+    .hero-image-wrap img {
+        max-height: 260px !important;
+    }
+
+    .modality-section {
+        padding: 1rem 1rem !important;
+    }
+    .modality-title {
+        font-size: 1.2rem !important;
+    }
+
+    [data-testid="stMetricValue"] {
+        font-size: 1.4rem !important;
+    }
+    [data-testid="stMetricLabel"] {
+        font-size: 0.7rem !important;
     }
 }
