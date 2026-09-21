@@ -86,7 +86,7 @@ st.markdown(f"""
 <h1 class="hero-headline">AI that sees <em>what<br>tired eyes miss.</em></h1>
 <p class="hero-sub">SCANOVA AI analyzes X-rays, MRIs, and CT scans in seconds — flagging potentially unusual regions with medical-grade heatmaps. <strong>Not a replacement for radiologists. A second pair of eyes.</strong></p>
 <div class="hero-ctas"><a href="#upload" class="cta-primary">Analyze a scan →</a><a href="/About" target="_self" class="cta-secondary">Read our story</a></div>
-<div class="trust-strip"><span class="trust-item"><strong>Python</strong></span><span class="trust-item"><strong>OpenCV</strong></span><span class="trust-item"><strong>Streamlit</strong></span><span class="trust-item">MIT Licensed</span><span class="trust-item">v3.0 · InnoEx 2026</span></div>
+<div class="trust-strip"><span class="trust-item"><strong>Python</strong></span><span class="trust-item"><strong>OpenCV</strong></span><span class="trust-item"><strong>ONNX</strong></span><span class="trust-item">MIT Licensed</span><span class="trust-item">v3.0 · InnoEx 2026</span></div>
 </div>
 <div class="hero-right">{hero_img_tag}</div>
 </div>
@@ -94,7 +94,7 @@ st.markdown(f"""
 
 
 # ==========================================================
-# WHAT IT READS — Modality grid
+# MODALITY GRID
 # ==========================================================
 st.markdown(
     '<div class="modality-section">'
@@ -164,15 +164,15 @@ with st.sidebar:
             "AI Engine",
             options=[
                 "⚡ Statistical (fast)",
-                "🧠 Deep Learning (accurate)"
+                "🧠 Deep Learning (accurate)",
+                "⚖️ Compare Both"
             ],
             index=0,
-            help="Statistical: fast block-based detection. "
-                 "Deep Learning: neural network reconstruction error."
+            help="Compare mode runs both engines side-by-side."
         )
 
-        # ============ Modality Selector (only for DL) ============
-        if "Deep Learning" in analysis_mode:
+        # Modality selector (for DL and Compare)
+        if "Deep Learning" in analysis_mode or "Compare" in analysis_mode:
             modality_choice = st.selectbox(
                 "Modality",
                 options=[
@@ -219,7 +219,7 @@ with st.sidebar:
         pass
 
     st.divider()
-    st.caption("Python • OpenCV • Streamlit")
+    st.caption("Python • OpenCV • ONNX • Streamlit")
 
 
 # ---------- Upload Section ----------
@@ -277,7 +277,6 @@ analyze_btn = st.button(
     disabled=uploaded_file is None
 )
 
-# Auto-trigger analyze if flagged (from Try Sample)
 if st.session_state.get("auto_analyze", False) and uploaded_file is not None:
     analyze_btn = True
     st.session_state.auto_analyze = False
@@ -294,35 +293,62 @@ if uploaded_file is not None:
         with st.spinner(f"Analyzing with {analysis_mode}..."):
             original, enhanced, normalized = preprocess(file_bytes)
 
-            # ============ Choose engine ============
-            if "Deep Learning" in analysis_mode and DL_AVAILABLE:
-                modality_map = {
-                    "🌐 Auto-detect": "auto",
-                    "🩻 Chest X-ray": "chest_xray",
-                    "🧠 Brain MRI":  "brain_mri",
-                    "🫁 Chest CT":   "chest_ct",
-                    "🦴 Bone Scan":  "bone_scan",
-                }
-                selected_modality = modality_map.get(modality_choice, "auto")
+            # Modality map
+            modality_map = {
+                "🌐 Auto-detect": "auto",
+                "🩻 Chest X-ray": "chest_xray",
+                "🧠 Brain MRI":  "brain_mri",
+                "🫁 Chest CT":   "chest_ct",
+                "🦴 Bone Scan":  "bone_scan",
+            }
+            selected_modality = modality_map.get(modality_choice, "auto")
 
-                anomaly_map = detect_anomalies_dl(
-                    enhanced, modality=selected_modality
-                )
-                if anomaly_map is None:
-                    anomaly_map = detect_anomalies(enhanced, block_size=block_size)
-            else:
-                anomaly_map = detect_anomalies(enhanced, block_size=block_size)
-
-            regions = find_anomaly_regions(anomaly_map, threshold=sensitivity)
-
-            raw_heat, overlay = generate_heatmap(original, anomaly_map)
+            # ---- Statistical ----
+            stat_start = time.time()
+            anomaly_map_stat = detect_anomalies(enhanced, block_size=block_size)
+            regions_stat = find_anomaly_regions(anomaly_map_stat, threshold=sensitivity)
+            heat_stat, overlay_stat = generate_heatmap(original, anomaly_map_stat)
             if show_boxes:
-                overlay = draw_boxes(overlay, regions)
+                overlay_stat = draw_boxes(overlay_stat, regions_stat)
+            report_stat = generate_report(anomaly_map_stat, regions_stat, threshold=sensitivity)
+            stat_time = time.time() - stat_start
 
-            report = generate_report(anomaly_map, regions, threshold=sensitivity)
+            # ---- Deep Learning ----
+            anomaly_map_dl = None
+            regions_dl = []
+            heat_dl = None
+            overlay_dl = None
+            report_dl = None
+            dl_time = 0
+
+            if DL_AVAILABLE and ("Deep Learning" in analysis_mode or "Compare" in analysis_mode):
+                dl_start = time.time()
+                anomaly_map_dl = detect_anomalies_dl(enhanced, modality=selected_modality)
+                if anomaly_map_dl is not None:
+                    regions_dl = find_anomaly_regions(anomaly_map_dl, threshold=sensitivity)
+                    heat_dl, overlay_dl = generate_heatmap(original, anomaly_map_dl)
+                    if show_boxes:
+                        overlay_dl = draw_boxes(overlay_dl, regions_dl)
+                    report_dl = generate_report(anomaly_map_dl, regions_dl, threshold=sensitivity)
+                dl_time = time.time() - dl_start
+
+            # ---- Primary result ----
+            if "Compare" in analysis_mode and anomaly_map_dl is not None:
+                anomaly_map, regions, raw_heat, overlay, report = (
+                    anomaly_map_dl, regions_dl, heat_dl, overlay_dl, report_dl
+                )
+            elif "Deep Learning" in analysis_mode and anomaly_map_dl is not None:
+                anomaly_map, regions, raw_heat, overlay, report = (
+                    anomaly_map_dl, regions_dl, heat_dl, overlay_dl, report_dl
+                )
+            else:
+                anomaly_map, regions, raw_heat, overlay, report = (
+                    anomaly_map_stat, regions_stat, heat_stat, overlay_stat, report_stat
+                )
 
         analysis_duration = time.time() - start_time
 
+        # Store everything
         st.session_state.original = original
         st.session_state.processed = enhanced
         st.session_state.heatmap = raw_heat
@@ -330,6 +356,22 @@ if uploaded_file is not None:
         st.session_state.regions = regions
         st.session_state.report = report
         st.session_state.analysis_mode = analysis_mode
+
+        st.session_state.compare_mode = "Compare" in analysis_mode
+        st.session_state.stat_results = {
+            "regions": regions_stat,
+            "heat": heat_stat,
+            "overlay": overlay_stat,
+            "report": report_stat,
+            "time": stat_time,
+        }
+        st.session_state.dl_results = {
+            "regions": regions_dl,
+            "heat": heat_dl,
+            "overlay": overlay_dl,
+            "report": report_dl,
+            "time": dl_time,
+        } if anomaly_map_dl is not None else None
 
         record_scan(
             filename=uploaded_file.name,
@@ -341,40 +383,88 @@ if uploaded_file is not None:
 
     # ---------- Display Results ----------
     if "original" in st.session_state and st.session_state.original is not None:
-        st.divider()
 
-        st.markdown(
-            '<div class="section-header">'
-            '<span class="section-header-icon">🖼️</span>'
-            '<div><h2 class="section-header-text">Analysis Results</h2>'
-            f'<p class="section-header-desc">Engine: {st.session_state.get("analysis_mode", "Statistical")}</p></div>'
-            '</div>',
-            unsafe_allow_html=True
-        )
+        # ========== COMPARE MODE ==========
+        if st.session_state.get("compare_mode", False) and st.session_state.get("dl_results"):
+            st.divider()
+            st.markdown(
+                '<div class="section-header">'
+                '<span class="section-header-icon">⚖️</span>'
+                '<div><h2 class="section-header-text">Side-by-Side Comparison</h2>'
+                '<p class="section-header-desc">Same image, two AI engines</p></div>'
+                '</div>',
+                unsafe_allow_html=True
+            )
 
-        mobile_view = st.toggle("📱 Mobile View (stack images)", value=False)
+            stat = st.session_state.stat_results
+            dl = st.session_state.dl_results
 
-        if mobile_view:
-            st.image(st.session_state.original,
-                     caption="① Original (resized)", use_container_width=True)
-            st.image(st.session_state.processed,
-                     caption="② Preprocessed (CLAHE)", use_container_width=True)
-            st.image(st.session_state.heatmap,
-                     caption="③ Anomaly Heatmap", use_container_width=True)
-            st.image(st.session_state.overlay,
-                     caption="④ Detection Overlay", use_container_width=True)
+            col_stat, col_dl = st.columns(2)
+
+            with col_stat:
+                st.markdown("### ⚡ Statistical Engine")
+                st.image(stat["overlay"], use_container_width=True,
+                         caption="Detection Overlay")
+                c1, c2 = st.columns(2)
+                c1.metric("Regions", len(stat["regions"]))
+                c2.metric("Time", f"{stat['time']:.2f}s")
+                c3, c4 = st.columns(2)
+                c3.metric("Affected", f"{stat['report']['affected_area_percent']}%")
+                c4.metric("Status", stat["report"]["level"].upper())
+
+            with col_dl:
+                st.markdown("### 🧠 Deep Learning Engine")
+                st.image(dl["overlay"], use_container_width=True,
+                         caption="Detection Overlay")
+                c1, c2 = st.columns(2)
+                c1.metric("Regions", len(dl["regions"]))
+                c2.metric("Time", f"{dl['time']:.2f}s")
+                c3, c4 = st.columns(2)
+                c3.metric("Affected", f"{dl['report']['affected_area_percent']}%")
+                c4.metric("Status", dl["report"]["level"].upper())
+
+            st.info(
+                "💡 **Statistical** is fast and rule-based. "
+                "**Deep Learning** uses a trained neural network. "
+                "Compare the heatmaps and regions to see the difference."
+            )
+
+        # ========== SINGLE ENGINE RESULTS ==========
         else:
-            c1, c2 = st.columns(2)
-            with c1:
+            st.divider()
+
+            st.markdown(
+                '<div class="section-header">'
+                '<span class="section-header-icon">🖼️</span>'
+                '<div><h2 class="section-header-text">Analysis Results</h2>'
+                f'<p class="section-header-desc">Engine: {st.session_state.get("analysis_mode", "Statistical")}</p></div>'
+                '</div>',
+                unsafe_allow_html=True
+            )
+
+            mobile_view = st.toggle("📱 Mobile View (stack images)", value=False)
+
+            if mobile_view:
                 st.image(st.session_state.original,
                          caption="① Original (resized)", use_container_width=True)
-                st.image(st.session_state.heatmap,
-                         caption="③ Anomaly Heatmap", use_container_width=True)
-            with c2:
                 st.image(st.session_state.processed,
                          caption="② Preprocessed (CLAHE)", use_container_width=True)
+                st.image(st.session_state.heatmap,
+                         caption="③ Anomaly Heatmap", use_container_width=True)
                 st.image(st.session_state.overlay,
                          caption="④ Detection Overlay", use_container_width=True)
+            else:
+                c1, c2 = st.columns(2)
+                with c1:
+                    st.image(st.session_state.original,
+                             caption="① Original (resized)", use_container_width=True)
+                    st.image(st.session_state.heatmap,
+                             caption="③ Anomaly Heatmap", use_container_width=True)
+                with c2:
+                    st.image(st.session_state.processed,
+                             caption="② Preprocessed (CLAHE)", use_container_width=True)
+                    st.image(st.session_state.overlay,
+                             caption="④ Detection Overlay", use_container_width=True)
 
         # ---------- Report ----------
         st.divider()
@@ -390,16 +480,10 @@ if uploaded_file is not None:
 
         r = st.session_state.report
 
-        if mobile_view:
-            c1, c2 = st.columns(2)
-            c1.metric("Regions Found", r["regions_found"])
-            c2.metric("Status", r["level"].upper())
-            st.metric("Affected Area", f"{r['affected_area_percent']}%")
-        else:
-            c1, c2, c3 = st.columns(3)
-            c1.metric("Regions Found", r["regions_found"])
-            c2.metric("Affected Area", f"{r['affected_area_percent']}%")
-            c3.metric("Status", r["level"].upper())
+        c1, c2, c3 = st.columns(3)
+        c1.metric("Regions Found", r["regions_found"])
+        c2.metric("Affected Area", f"{r['affected_area_percent']}%")
+        c3.metric("Status", r["level"].upper())
 
         if r["level"] == "safe":
             st.success(r["status"])
@@ -446,7 +530,7 @@ if uploaded_file is not None:
 
 
 # ==========================================================
-# FAQ SECTION (compact)
+# FAQ SECTION
 # ==========================================================
 st.divider()
 
@@ -474,6 +558,14 @@ with st.expander("🧠 How does the AI actually work?"):
         "the image; regions it can't reconstruct well are flagged as anomalies."
     )
 
+with st.expander("⚖️ What is Compare mode?"):
+    st.markdown(
+        "Compare mode runs both the **Statistical engine** and the "
+        "**Deep Learning engine** on the same image, side-by-side. "
+        "It's the easiest way to see the difference between classical and "
+        "modern AI approaches."
+    )
+
 with st.expander("🔒 Is my data stored?"):
     st.markdown(
         "**No.** Images are processed in-memory only. Nothing is saved, "
@@ -487,7 +579,7 @@ with st.expander("💸 Is it free?"):
     )
 
 st.markdown(
-    "📖 **See all 9 questions →** "
+    "📖 **See all 10 questions →** "
     "[Open the full FAQ page](/FAQ)"
 )
 
