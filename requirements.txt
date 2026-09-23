@@ -7,3 +7,4 @@ reportlab
 streamlit-extras
 onnxruntime
 pydicom
+scikit-learn
