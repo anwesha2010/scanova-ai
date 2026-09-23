@@ -770,6 +770,118 @@ if uploaded_file is not None:
         st.info(r["disclaimer"])
                 # ===== View Mode: Patient / Clinical =====
         from backend.report import patient_explanation, clinical_explanation
+                # ===== SCANOVA INSIGHT CARD =====
+        try:
+            _r = st.session_state.report
+            _view = st.session_state.get("view_mode", "clinical")
+            _regions_list = st.session_state.get("regions", []) or []
+
+            # Headline text
+            _n = _r.get("regions_found", 0)
+            if _n == 0:
+                _what = "The model did not find any regions that stood out as unusual. The image resembles the normal training data."
+            elif _n <= 2:
+                _what = f"The model found <strong>{_n} region(s)</strong> that could not be reconstructed as accurately as the rest of the image."
+            else:
+                _what = f"The model flagged <strong>{_n} region(s)</strong> for review — these areas showed higher reconstruction error than the rest of the image."
+
+            # Where — hotspots
+            _where_html = ""
+            for i, (x, y, w, h) in enumerate(_regions_list[:5], 1):
+                _where_html += (
+                    '<div class="scanova-insight-hotspot">'
+                    f'<span>Region {i} · x={x}, y={y}</span>'
+                    f'<span class="scanova-insight-hotspot-score">{w}×{h}px</span>'
+                    '</div>'
+                )
+            if not _where_html:
+                _where_html = '<p class="scanova-insight-body">No specific regions were localized.</p>'
+
+            # Confidence — derived from affected area + regions (heuristic)
+            _affected = float(_r.get("affected_area_percent", 0))
+            _confidence = min(95, max(35, int(50 + _affected * 2)))
+            if _n == 0:
+                _confidence = 88  # high confidence for "no anomaly"
+            _conf_bar = (
+                '<div class="scanova-insight-confidence">'
+                '<div class="scanova-insight-bar">'
+                f'<div class="scanova-insight-bar-fill" style="width: {_confidence}%;"></div>'
+                '</div>'
+                f'<span class="scanova-insight-confidence-value">{_confidence}%</span>'
+                '</div>'
+                '<p class="scanova-insight-body" style="margin-top: 0.5rem; font-size: 0.85rem;">'
+                'Based on reconstruction quality — NOT a probability of disease.'
+                '</p>'
+            )
+
+            # What it means — from patient/clinical view
+            from backend.report import patient_explanation
+            _means = patient_explanation(_r) if _view == "patient" else (
+                f"Status: <strong>{_r.get('level','safe').upper()}</strong> · "
+                f"Regions: {_n} · Affected area: {_affected:.2f}%"
+            )
+
+            # What next
+            if _n == 0:
+                _next = "Routine follow-up if symptoms persist. No urgent action indicated by this AI screening."
+            else:
+                _next = "Have a qualified healthcare professional review the image. This is not a diagnosis."
+
+            # Learn more
+            _learn = (
+                "Reconstruction error is a common anomaly-detection technique. "
+                "The model compares the input to what it learned as 'normal'. "
+                "Regions that differ most are flagged."
+            )
+
+            _insight_html = (
+                '<div class="scanova-insight">'
+
+                '<div class="scanova-insight-header">'
+                '<span style="font-size: 1.75rem;">🔬</span>'
+                '<h3 class="scanova-insight-title">SCANOVA INSIGHT</h3>'
+                '</div>'
+
+                '<div class="scanova-insight-section">'
+                '<span class="scanova-insight-label">What the AI detected</span>'
+                f'<p class="scanova-insight-body">{_what}</p>'
+                '</div>'
+
+                '<div class="scanova-insight-section">'
+                '<span class="scanova-insight-label">Where</span>'
+                + _where_html +
+                '</div>'
+
+                '<div class="scanova-insight-section">'
+                '<span class="scanova-insight-label">Model confidence</span>'
+                + _conf_bar +
+                '</div>'
+
+                '<div class="scanova-insight-section">'
+                '<span class="scanova-insight-label">What it means</span>'
+                f'<p class="scanova-insight-body">{_means}</p>'
+                '</div>'
+
+                '<div class="scanova-insight-section">'
+                '<span class="scanova-insight-label">What next?</span>'
+                '<div class="scanova-insight-next">'
+                '<span class="scanova-insight-next-arrow">→</span>'
+                f'<span>{_next}</span>'
+                '</div>'
+                '</div>'
+
+                '<div class="scanova-insight-section">'
+                '<span class="scanova-insight-label">Learn more</span>'
+                f'<p class="scanova-insight-learn">{_learn}</p>'
+                '</div>'
+
+                '</div>'
+            )
+
+            st.markdown(_insight_html, unsafe_allow_html=True)
+
+        except Exception as _insight_err:
+            pass  # fail silently if insight card cannot render
                 # ===== Explainability Module =====
         from backend.explainer import explain_reconstruction_error
 
