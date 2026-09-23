@@ -91,34 +91,108 @@ st.markdown("""
 
 
 # ==========================================================
-# HERO SECTION
+# SCANOVA 2.0 — HOME / BRAND
 # ==========================================================
 hero_stats = get_stats()
 
+# ---- Brand block ----
+st.markdown("""
+<div class="scanova-brand-block">
+    <div class="scanova-brand-tag">SEE · ANALYZE · EXPLAIN</div>
+    <h1 class="scanova-brand-name">SCANOVA</h1>
+    <p class="scanova-brand-subtitle">
+        An AI-powered medical imaging assistant that helps you
+        <strong>see</strong> what the model sees, <strong>analyze</strong>
+        what it found, and <strong>explain</strong> the results in plain language.
+    </p>
+</div>
+""", unsafe_allow_html=True)
+
+# ---- Three primary options ----
+st.markdown("""
+<div class="primary-options">
+    <div class="primary-option xray">
+        <span class="primary-option-icon">🫁</span>
+        <div class="primary-option-title">X-Ray Analysis</div>
+        <div class="primary-option-desc">
+            Chest and general X-ray images. Best results with clear, frontal views.
+        </div>
+        <span class="primary-option-cta">SCAN NOW →</span>
+    </div>
+    <div class="primary-option ct">
+        <span class="primary-option-icon">🧠</span>
+        <div class="primary-option-title">CT Scan</div>
+        <div class="primary-option-desc">
+            Chest CT images — single-slice or DICOM. Detects structural irregularities.
+        </div>
+        <span class="primary-option-cta">SCAN NOW →</span>
+    </div>
+    <div class="primary-option bone">
+        <span class="primary-option-icon">🦴</span>
+        <div class="primary-option-title">Bone X-Ray</div>
+        <div class="primary-option-desc">
+            Bone and fracture-related images. Surfaces density discontinuities.
+        </div>
+        <span class="primary-option-cta">SCAN NOW →</span>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# ---- How it works flow ----
+# ---- How it works flow (horizontal) ----
+st.markdown("""
+<div class="flow-container">
+    <div class="flow-title">🔬 How SCANOVA Works</div>
+    <div class="flow-horizontal">
+        <div class="flow-step-h s1">
+            <div class="flow-step-num">1</div>
+            <span class="flow-step-icon">📤</span>
+            <div class="flow-step-label">Image<br>Upload</div>
+        </div>
+        <div class="flow-step-h s2">
+            <div class="flow-step-num">2</div>
+            <span class="flow-step-icon">✅</span>
+            <div class="flow-step-label">Quality<br>Check</div>
+        </div>
+        <div class="flow-step-h s3">
+            <div class="flow-step-num">3</div>
+            <span class="flow-step-icon">🧠</span>
+            <div class="flow-step-label">AI<br>Analysis</div>
+        </div>
+        <div class="flow-step-h s4">
+            <div class="flow-step-num">4</div>
+            <span class="flow-step-icon">🔥</span>
+            <div class="flow-step-label">Explainable<br>AI</div>
+        </div>
+        <div class="flow-step-h s5">
+            <div class="flow-step-num">5</div>
+            <span class="flow-step-icon">💬</span>
+            <div class="flow-step-label">Patient<br>Insight</div>
+        </div>
+        <div class="flow-step-h s6">
+            <div class="flow-step-num">6</div>
+            <span class="flow-step-icon">👨‍⚕️</span>
+            <div class="flow-step-label">Professional<br>Review</div>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
+
+# ---- Preserve the original hero image (secondary visual) ----
 try:
     with open("branding/hero_image.png", "rb") as f:
         hero_img_b64 = base64.b64encode(f.read()).decode()
-    hero_img_tag = (
-        f'<div class="hero-image-wrap">'
-        f'<img src="data:image/png;base64,{hero_img_b64}" alt="SCANOVA AI hero" />'
+    st.markdown(
+        f'<div style="max-width:520px; margin: 0 auto 2rem auto;">'
+        f'<div class="hero-image-wrap" style="transform: rotate(0deg); margin: 0 auto;">'
+        f'<img src="data:image/png;base64,{hero_img_b64}" alt="SCANOVA hero" />'
         f'<div class="hero-image-badge">Live scan preview</div>'
         f'</div>'
+        f'</div>',
+        unsafe_allow_html=True
     )
 except FileNotFoundError:
-    hero_img_tag = ""
-
-st.markdown(f"""
-<div class="hero-split">
-<div class="hero-left">
-<div class="hero-eyebrow"><span class="hero-eyebrow-dot"></span>BUILT BY STUDENTS · DEPLOYED TO PRODUCTION</div>
-<h1 class="hero-headline">AI that sees <em>what<br>tired eyes miss.</em></h1>
-<p class="hero-sub">SCANOVA AI analyzes X-rays, MRIs, and CT scans in seconds — flagging potentially unusual regions with medical-grade heatmaps. <strong>Not a replacement for radiologists. A second pair of eyes.</strong></p>
-<div class="hero-ctas"><a href="#upload" class="cta-primary">Analyze a scan →</a><a href="/About" target="_self" class="cta-secondary">Read our story</a></div>
-<div class="trust-strip"><span class="trust-item"><strong>Python</strong></span><span class="trust-item"><strong>OpenCV</strong></span><span class="trust-item"><strong>ONNX</strong></span><span class="trust-item">DICOM-ready</span><span class="trust-item">MIT Licensed</span><span class="trust-item">v3.0 · InnoEx 2026</span></div>
-</div>
-<div class="hero-right">{hero_img_tag}</div>
-</div>
-""", unsafe_allow_html=True)
+    pass
 
 
 # ==========================================================

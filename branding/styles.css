@@ -1164,3 +1164,320 @@ hr {
     color: #0f172a;
     font-weight: 700;
 }
+/* ============================================
+   SCANOVA 2.0 — HOME PAGE
+   ============================================ */
+
+.scanova-brand-block {
+    padding: 2.5rem 0 2rem 0;
+    text-align: center;
+}
+
+.scanova-brand-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.35em;
+    color: #0ea5e9;
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+}
+
+.scanova-brand-name {
+    font-family: 'Inter', sans-serif;
+    font-size: clamp(3rem, 8vw, 5.5rem);
+    font-weight: 900;
+    letter-spacing: -0.05em;
+    line-height: 0.95;
+    color: #0f172a;
+    margin: 0 0 1rem 0;
+}
+
+.scanova-brand-subtitle {
+    font-size: 1.15rem;
+    color: #64748b;
+    max-width: 640px;
+    margin: 0 auto;
+    line-height: 1.6;
+}
+
+/* Primary option cards */
+.primary-options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 20px;
+    margin: 2.5rem 0 3rem 0;
+}
+
+.primary-option {
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 2rem 1.75rem;
+    text-align: left;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+}
+
+.primary-option::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: var(--accent, #0ea5e9);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.primary-option:hover {
+    border-color: var(--accent, #0ea5e9);
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(14, 165, 233, 0.15);
+}
+
+.primary-option:hover::before {
+    opacity: 1;
+}
+
+.primary-option-icon {
+    font-size: 2.75rem;
+    display: block;
+    margin-bottom: 1.25rem;
+    line-height: 1;
+}
+
+.primary-option-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #0f172a;
+    margin: 0 0 0.5rem 0;
+}
+
+.primary-option-desc {
+    font-size: 0.9rem;
+    color: #64748b;
+    line-height: 1.55;
+    margin: 0 0 1rem 0;
+}
+
+.primary-option-cta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: var(--accent, #0ea5e9);
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.primary-option.xray { --accent: #0ea5e9; }
+.primary-option.ct   { --accent: #8b5cf6; }
+.primary-option.bone { --accent: #f97316; }
+
+/* How it works flow */
+/* ============================================
+   HOW SCANOVA WORKS — HORIZONTAL FLOW
+   ============================================ */
+
+.flow-container {
+    background: linear-gradient(180deg, #f8fafc 0%, #f0f9ff 100%);
+    border: 1px solid #e0f2fe;
+    border-radius: 20px;
+    padding: 2.5rem 2rem;
+    margin: 2rem auto 3rem auto;
+    max-width: 1200px;
+}
+
+.flow-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: #0ea5e9;
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.flow-horizontal {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    align-items: stretch;
+    position: relative;
+}
+
+.flow-step-h {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 1.25rem 0.75rem;
+    text-align: center;
+    position: relative;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    overflow: hidden;
+}
+
+.flow-step-h::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: var(--step-accent, #0ea5e9);
+    opacity: 0.9;
+}
+
+.flow-step-h:hover {
+    border-color: var(--step-accent, #0ea5e9);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(14, 165, 233, 0.15);
+}
+
+.flow-step-num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--step-accent, #0ea5e9);
+    color: #ffffff;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 800;
+    margin-bottom: 0.25rem;
+}
+
+.flow-step-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+    display: block;
+}
+
+.flow-step-label {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #0f172a;
+    text-transform: uppercase;
+    line-height: 1.3;
+}
+
+/* Arrow between steps — using CSS pseudo elements */
+.flow-horizontal .flow-step-h:not(:last-child)::after {
+    content: '→';
+    position: absolute;
+    right: -14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #0ea5e9;
+    font-size: 1rem;
+    font-weight: 700;
+    z-index: 2;
+}
+
+/* Accent colors per step */
+.flow-step-h.s1 { --step-accent: #0ea5e9; }
+.flow-step-h.s2 { --step-accent: #8b5cf6; }
+.flow-step-h.s3 { --step-accent: #f97316; }
+.flow-step-h.s4 { --step-accent: #10b981; }
+.flow-step-h.s5 { --step-accent: #ec4899; }
+.flow-step-h.s6 { --step-accent: #0f172a; }
+
+/* Responsive — tablet: 3 per row */
+@media (max-width: 900px) {
+    .flow-horizontal {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+    }
+    .flow-horizontal .flow-step-h:not(:last-child)::after {
+        display: none;
+    }
+}
+
+/* Mobile: 2 per row */
+@media (max-width: 600px) {
+    .flow-container {
+        padding: 1.75rem 1rem;
+    }
+    .flow-horizontal {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    .flow-step-h {
+        padding: 1rem 0.5rem;
+    }
+    .flow-step-label {
+        font-size: 0.65rem;
+    }
+    .flow-step-icon {
+        font-size: 1.25rem;
+    }
+}
+
+.flow-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: #0ea5e9;
+    text-transform: uppercase;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.flow-steps {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.flow-step {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 0.85rem 1.5rem;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: #0f172a;
+    text-transform: uppercase;
+    min-width: 280px;
+    text-align: center;
+}
+
+.flow-arrow {
+    font-size: 1.1rem;
+    color: #0ea5e9;
+}
+
+@media (max-width: 768px) {
+    .primary-option {
+        padding: 1.5rem 1.25rem;
+    }
+    .primary-option-icon {
+        font-size: 2rem;
+    }
+    .primary-option-title {
+        font-size: 1.05rem;
+    }
+    .flow-step {
+        min-width: 100%;
+        font-size: 0.7rem;
+    }
+}
