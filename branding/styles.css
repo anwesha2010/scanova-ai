@@ -1838,3 +1838,112 @@ hr {
     font-style: italic;
     line-height: 1.6;
 }
+/* ============================================
+   EXPLAINABILITY MODULE
+   ============================================ */
+
+.explainability-card {
+    background: linear-gradient(135deg, #ffffff 0%, #fef3c7 100%);
+    border: 1px solid #fcd34d;
+    border-radius: 16px;
+    padding: 1.75rem 2rem;
+    margin: 1.5rem 0;
+}
+
+.explainability-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid #fcd34d;
+}
+
+.explainability-header-icon {
+    font-size: 1.5rem;
+}
+
+.explainability-header-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: #92400e;
+    text-transform: uppercase;
+}
+
+.explainability-method {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: #0ea5e9;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.explainability-body {
+    font-size: 0.95rem;
+    color: #334155;
+    line-height: 1.65;
+    margin: 0 0 1rem 0;
+}
+
+.explainability-note {
+    background: #fffbeb;
+    border-left: 3px solid #f59e0b;
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    color: #78350f;
+    line-height: 1.55;
+    margin: 1rem 0;
+}
+
+.explainability-note strong {
+    color: #92400e;
+    font-weight: 700;
+}
+
+.explainability-hotspots {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 1rem 1.25rem;
+    margin: 1rem 0;
+}
+
+.explainability-hotspots-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: #0ea5e9;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+}
+
+.explainability-hotspot {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: #334155;
+    padding: 0.25rem 0;
+    display: flex;
+    justify-content: space-between;
+}
+
+.explainability-hotspot-score {
+    color: #dc2626;
+    font-weight: 700;
+}
+
+.explainability-modality-note {
+    background: #f0f9ff;
+    border-left: 3px solid #0ea5e9;
+    border-radius: 6px;
+    padding: 0.75rem 1rem;
+    font-size: 0.85rem;
+    color: #0c4a6e;
+    line-height: 1.55;
+    margin-top: 1rem;
+}

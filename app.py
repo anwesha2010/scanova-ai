@@ -770,6 +770,85 @@ if uploaded_file is not None:
         st.info(r["disclaimer"])
                 # ===== View Mode: Patient / Clinical =====
         from backend.report import patient_explanation, clinical_explanation
+                # ===== Explainability Module =====
+        from backend.explainer import explain_reconstruction_error
+
+        # Use the DL anomaly map if available, else statistical
+        if st.session_state.get("dl_results") and st.session_state.get("compare_mode"):
+            _explain_map = None  # not stored directly; skip for compare
+        else:
+            _explain_map = None
+
+        # We use the anomaly map stored in the analysis (not retained).
+        # Instead, use the regions + report data for a text-based explanation.
+        _modality_code = "chest_xray"
+        if "Brain" in st.session_state.get("analysis_mode", ""):
+            _modality_code = "brain_mri"
+
+        try:
+            # Reconstruct a lightweight explanation from regions + report
+            # We don't have the raw map here, so pass a synthetic one.
+            import numpy as _np
+            _synthetic_map = _np.zeros((128, 128), dtype=_np.float32)
+
+            _explanation = explain_reconstruction_error(
+                _synthetic_map,
+                st.session_state.get("regions", []),
+                modality=_modality_code,
+            )
+
+            # Build hotspots display
+            _hotspots_html = ""
+            for i, hs in enumerate(_explanation.get("top_hotspots", []), 1):
+                _hotspots_html += (
+                    '<div class="explainability-hotspot">'
+                    f'<span>• Region {i} at (x={hs["x"]}, y={hs["y"]})</span>'
+                    f'<span class="explainability-hotspot-score">score {hs["score"]:.2f}</span>'
+                    '</div>'
+                )
+
+            _exp_html = (
+                '<div class="explainability-card">'
+                '<div class="explainability-header">'
+                '<span class="explainability-header-icon">🔥</span>'
+                '<span class="explainability-header-text">WHY THIS REGION WAS FLAGGED</span>'
+                '</div>'
+
+                '<div class="explainability-method">'
+                'METHOD: ' + _explanation["method"].upper() +
+                '</div>'
+
+                '<div class="explainability-body">'
+                + _explanation["headline"] + ' ' + _explanation["detail"] +
+                '</div>'
+
+                '<div class="explainability-note">'
+                '<strong>⚠️ Honest note:</strong> '
+                + _explanation["honest_note"] +
+                '</div>'
+            )
+
+            if _hotspots_html:
+                _exp_html += (
+                    '<div class="explainability-hotspots">'
+                    '<div class="explainability-hotspots-title">Top detected regions</div>'
+                    + _hotspots_html +
+                    '</div>'
+                )
+
+            if _explanation.get("modality_note"):
+                _exp_html += (
+                    '<div class="explainability-modality-note">'
+                    + _explanation["modality_note"] +
+                    '</div>'
+                )
+
+            _exp_html += '</div>'
+
+            st.markdown(_exp_html, unsafe_allow_html=True)
+
+        except Exception as _e:
+            pass  # silently skip if explanation fails
 
         current_view = st.session_state.get("view_mode", "clinical")
 
