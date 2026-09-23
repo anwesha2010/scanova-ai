@@ -342,6 +342,19 @@ with st.sidebar:
     show_boxes = st.checkbox("Show bounding boxes", value=True)
 
     st.divider()
+        
+    st.markdown("### 🎛️ Display Mode")
+
+    view_mode_choice = st.radio(
+        "Language",
+        options=["👨‍⚕️ Clinical View", "👨‍👩‍👧 Patient View"],
+        index=0,
+        help="Clinical shows technical details. Patient shows plain-language explanations.",
+        key="view_mode_toggle"
+    )
+    st.session_state.view_mode = (
+        "patient" if "Patient" in view_mode_choice else "clinical"
+    )
     st.markdown("### 📊 Session Stats")
     try:
         sidebar_stats = get_stats()
@@ -457,10 +470,67 @@ if st.session_state.get("auto_analyze", False) and uploaded_file is not None:
 if uploaded_file is not None:
     st.success(f"✅ Loaded: **{uploaded_file.name}**")
 
-    if analyze_btn:
-        file_bytes = uploaded_file.read()
-        start_time = time.time()
+    # ===== PRE-SCAN QUALITY CHECK =====
+    from backend.quality_check import check_image_quality
 
+    # Read the file bytes once — store them so we can re-use
+    if st.session_state.get("_cached_file_bytes") is None or \
+       st.session_state.get("_cached_file_name") != uploaded_file.name:
+        st.session_state._cached_file_bytes = uploaded_file.read()
+        st.session_state._cached_file_name = uploaded_file.name
+        st.session_state.quality_result = None  # reset
+
+    file_bytes = st.session_state._cached_file_bytes
+
+    # Run quality check once per file
+    if st.session_state.get("quality_result") is None:
+        try:
+            from backend.preprocess import load_image
+            raw_img = load_image(file_bytes)
+            st.session_state.quality_result = check_image_quality(raw_img)
+        except Exception as e:
+            st.session_state.quality_result = {
+                "checks": [("Image loaded", False, str(e))],
+                "passed": 0,
+                "total": 1,
+                "overall": "poor",
+                "message": "❌ Could not read the image. Please try another file.",
+            }
+
+    # Display pre-scan panel
+    qc = st.session_state.quality_result
+
+    checks_html = ""
+    for label, passed, detail in qc["checks"]:
+        icon = "✅" if passed else "⚠️"
+        cls = "pass" if passed else "fail"
+        checks_html += (
+            '<div class="prescan-check ' + cls + '">'
+            '<div class="prescan-check-left">'
+            '<span class="prescan-check-icon">' + icon + '</span>'
+            '<span class="prescan-check-label">' + label + '</span>'
+            '</div>'
+            '<span class="prescan-check-detail">' + detail + '</span>'
+            '</div>'
+        )
+
+    prescan_html = (
+        '<div class="prescan-panel">'
+        '<div class="prescan-header">'
+        '<span class="prescan-header-icon">🔍</span>'
+        '<span class="prescan-header-text">SCANOVA PRE-SCAN</span>'
+        '</div>'
+        + checks_html +
+        '<div class="prescan-message ' + qc["overall"] + '">'
+        + qc["message"] +
+        '</div>'
+        '</div>'
+    )
+    st.markdown(prescan_html, unsafe_allow_html=True)
+
+    # ----- Analyze button -----
+    if analyze_btn:
+        start_time = time.time()
         current_mode = analysis_mode
 
         with st.spinner(f"Analyzing with {current_mode}..."):
@@ -698,6 +768,39 @@ if uploaded_file is not None:
             st.error(r["status"])
 
         st.info(r["disclaimer"])
+                # ===== View Mode: Patient / Clinical =====
+        from backend.report import patient_explanation, clinical_explanation
+
+        current_view = st.session_state.get("view_mode", "clinical")
+
+        if current_view == "patient":
+            _explanation_html = (
+                '<div class="explanation-patient">'
+                '<div class="explanation-patient-header">'
+                '💬 <span>What this means — in plain language</span>'
+                '</div>'
+                '<div class="explanation-patient-body">'
+                + patient_explanation(r) +
+                '</div>'
+                '<div class="explanation-patient-note">'
+                'This is not a diagnosis. Always consult a qualified '
+                'healthcare professional for medical decisions.'
+                '</div>'
+                '</div>'
+            )
+        else:
+            _explanation_html = (
+                '<div class="explanation-clinical">'
+                '<div class="explanation-clinical-header">'
+                '⚡ Technical Summary'
+                '</div>'
+                '<div class="explanation-clinical-body">'
+                + clinical_explanation(r) +
+                '</div>'
+                '</div>'
+            )
+
+        st.markdown(_explanation_html, unsafe_allow_html=True)
 
         _result_disc = (
             '<div class="result-disclaimer">'
