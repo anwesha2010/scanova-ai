@@ -56,6 +56,22 @@ except Exception:
     pass
 
 
+# ==========================================================
+# JUDGE MODE INIT
+# ==========================================================
+try:
+    from backend.judge_mode import (
+        init_judge_mode,
+        render_judge_banner,
+        render_judge_controls,
+    )
+    init_judge_mode()
+    render_judge_banner()
+    render_judge_controls()
+except Exception:
+    pass
+
+
 # ---------- Top Announcement Banner ----------
 _banner_html = (
     '<div class="top-banner">'
@@ -342,7 +358,6 @@ with st.sidebar:
     show_boxes = st.checkbox("Show bounding boxes", value=True)
 
     st.divider()
-        
     st.markdown("### 🎛️ Display Mode")
 
     view_mode_choice = st.radio(
@@ -355,6 +370,15 @@ with st.sidebar:
     st.session_state.view_mode = (
         "patient" if "Patient" in view_mode_choice else "clinical"
     )
+
+    st.divider()
+    st.markdown("### 🏆 InnoEx")
+    if st.button("🏆 Judge Mode", use_container_width=True, key="judge_start_btn"):
+        st.session_state.judge_mode = True
+        st.session_state.judge_step = 0
+        st.rerun()
+
+    st.divider()
     st.markdown("### 📊 Session Stats")
     try:
         sidebar_stats = get_stats()
@@ -473,16 +497,14 @@ if uploaded_file is not None:
     # ===== PRE-SCAN QUALITY CHECK =====
     from backend.quality_check import check_image_quality
 
-    # Read the file bytes once — store them so we can re-use
     if st.session_state.get("_cached_file_bytes") is None or \
        st.session_state.get("_cached_file_name") != uploaded_file.name:
         st.session_state._cached_file_bytes = uploaded_file.read()
         st.session_state._cached_file_name = uploaded_file.name
-        st.session_state.quality_result = None  # reset
+        st.session_state.quality_result = None
 
     file_bytes = st.session_state._cached_file_bytes
 
-    # Run quality check once per file
     if st.session_state.get("quality_result") is None:
         try:
             from backend.preprocess import load_image
@@ -497,14 +519,13 @@ if uploaded_file is not None:
                 "message": "❌ Could not read the image. Please try another file.",
             }
 
-    # Display pre-scan panel
     qc = st.session_state.quality_result
 
-    checks_html = ""
+    _checks_html = ""
     for label, passed, detail in qc["checks"]:
         icon = "✅" if passed else "⚠️"
         cls = "pass" if passed else "fail"
-        checks_html += (
+        _checks_html += (
             '<div class="prescan-check ' + cls + '">'
             '<div class="prescan-check-left">'
             '<span class="prescan-check-icon">' + icon + '</span>'
@@ -514,21 +535,21 @@ if uploaded_file is not None:
             '</div>'
         )
 
-    prescan_html = (
+    _prescan_html = (
         '<div class="prescan-panel">'
         '<div class="prescan-header">'
         '<span class="prescan-header-icon">🔍</span>'
         '<span class="prescan-header-text">SCANOVA PRE-SCAN</span>'
         '</div>'
-        + checks_html +
+        + _checks_html +
         '<div class="prescan-message ' + qc["overall"] + '">'
         + qc["message"] +
         '</div>'
         '</div>'
     )
-    st.markdown(prescan_html, unsafe_allow_html=True)
+    st.markdown(_prescan_html, unsafe_allow_html=True)
 
-    # ----- Analyze button -----
+    # ----- Analyze -----
     if analyze_btn:
         start_time = time.time()
         current_mode = analysis_mode
@@ -574,7 +595,7 @@ if uploaded_file is not None:
                     report_dl = generate_report(anomaly_map_dl, regions_dl, threshold=sensitivity)
                 dl_time = time.time() - dl_start
 
-            # ---- Primary result ----
+            # ---- Primary ----
             if "Compare" in current_mode and anomaly_map_dl is not None:
                 anomaly_map, regions, raw_heat, overlay, report = (
                     anomaly_map_dl, regions_dl, heat_dl, overlay_dl, report_dl
@@ -633,14 +654,13 @@ if uploaded_file is not None:
     # ---------- Display Results ----------
     if st.session_state.get("original") is not None:
 
-        # ========== COMPARE MODE ==========
+        # ===== COMPARE MODE =====
         stored_mode = st.session_state.get("analysis_mode", "")
         is_compare = st.session_state.get("compare_mode", False) or "Compare" in stored_mode
         has_dl = st.session_state.get("dl_results") is not None
 
         if is_compare and has_dl:
             st.divider()
-
             _comp_header = (
                 '<div class="section-header">'
                 '<span class="section-header-icon">⚖️</span>'
@@ -675,7 +695,6 @@ if uploaded_file is not None:
                 c4.metric("Status", dl["report"]["level"].upper())
             else:
                 col_stat, col_dl = st.columns(2)
-
                 with col_stat:
                     st.markdown("### ⚡ Statistical Engine")
                     st.image(stat["overlay"], use_container_width=True, caption="Detection Overlay")
@@ -685,7 +704,6 @@ if uploaded_file is not None:
                     c3, c4 = st.columns(2)
                     c3.metric("Affected", f"{stat['report']['affected_area_percent']}%")
                     c4.metric("Status", stat["report"]["level"].upper())
-
                 with col_dl:
                     st.markdown("### 🧠 Deep Learning Engine")
                     st.image(dl["overlay"], use_container_width=True, caption="Detection Overlay")
@@ -702,10 +720,9 @@ if uploaded_file is not None:
                 "Compare the heatmaps and regions to see the difference."
             )
 
-        # ========== SINGLE ENGINE RESULTS ==========
+        # ===== SINGLE ENGINE =====
         else:
             st.divider()
-
             _single_header = (
                 '<div class="section-header">'
                 '<span class="section-header-icon">🖼️</span>'
@@ -741,7 +758,6 @@ if uploaded_file is not None:
 
         # ---------- Report ----------
         st.divider()
-
         _report_header = (
             '<div class="section-header">'
             '<span class="section-header-icon">📋</span>'
@@ -768,16 +784,13 @@ if uploaded_file is not None:
             st.error(r["status"])
 
         st.info(r["disclaimer"])
-                # ===== View Mode: Patient / Clinical =====
-        from backend.report import patient_explanation, clinical_explanation
-                # ===== SCANOVA INSIGHT CARD =====
+
+        # ===== SCANOVA INSIGHT CARD =====
         try:
-            _r = st.session_state.report
             _view = st.session_state.get("view_mode", "clinical")
             _regions_list = st.session_state.get("regions", []) or []
 
-            # Headline text
-            _n = _r.get("regions_found", 0)
+            _n = r.get("regions_found", 0)
             if _n == 0:
                 _what = "The model did not find any regions that stood out as unusual. The image resembles the normal training data."
             elif _n <= 2:
@@ -785,7 +798,6 @@ if uploaded_file is not None:
             else:
                 _what = f"The model flagged <strong>{_n} region(s)</strong> for review — these areas showed higher reconstruction error than the rest of the image."
 
-            # Where — hotspots
             _where_html = ""
             for i, (x, y, w, h) in enumerate(_regions_list[:5], 1):
                 _where_html += (
@@ -797,11 +809,11 @@ if uploaded_file is not None:
             if not _where_html:
                 _where_html = '<p class="scanova-insight-body">No specific regions were localized.</p>'
 
-            # Confidence — derived from affected area + regions (heuristic)
-            _affected = float(_r.get("affected_area_percent", 0))
+            _affected = float(r.get("affected_area_percent", 0))
             _confidence = min(95, max(35, int(50 + _affected * 2)))
             if _n == 0:
-                _confidence = 88  # high confidence for "no anomaly"
+                _confidence = 88
+
             _conf_bar = (
                 '<div class="scanova-insight-confidence">'
                 '<div class="scanova-insight-bar">'
@@ -814,20 +826,23 @@ if uploaded_file is not None:
                 '</p>'
             )
 
-            # What it means — from patient/clinical view
-            from backend.report import patient_explanation
-            _means = patient_explanation(_r) if _view == "patient" else (
-                f"Status: <strong>{_r.get('level','safe').upper()}</strong> · "
-                f"Regions: {_n} · Affected area: {_affected:.2f}%"
-            )
+            try:
+                from backend.report import patient_explanation
+                if _view == "patient":
+                    _means = patient_explanation(r)
+                else:
+                    _means = (
+                        f"Status: <strong>{r.get('level','safe').upper()}</strong> · "
+                        f"Regions: {_n} · Affected area: {_affected:.2f}%"
+                    )
+            except Exception:
+                _means = f"Status: {r.get('level','safe').upper()}"
 
-            # What next
             if _n == 0:
                 _next = "Routine follow-up if symptoms persist. No urgent action indicated by this AI screening."
             else:
                 _next = "Have a qualified healthcare professional review the image. This is not a diagnosis."
 
-            # Learn more
             _learn = (
                 "Reconstruction error is a common anomaly-detection technique. "
                 "The model compares the input to what it learned as 'normal'. "
@@ -836,32 +851,26 @@ if uploaded_file is not None:
 
             _insight_html = (
                 '<div class="scanova-insight">'
-
                 '<div class="scanova-insight-header">'
                 '<span style="font-size: 1.75rem;">🔬</span>'
                 '<h3 class="scanova-insight-title">SCANOVA INSIGHT</h3>'
                 '</div>'
-
                 '<div class="scanova-insight-section">'
                 '<span class="scanova-insight-label">What the AI detected</span>'
                 f'<p class="scanova-insight-body">{_what}</p>'
                 '</div>'
-
                 '<div class="scanova-insight-section">'
                 '<span class="scanova-insight-label">Where</span>'
                 + _where_html +
                 '</div>'
-
                 '<div class="scanova-insight-section">'
                 '<span class="scanova-insight-label">Model confidence</span>'
                 + _conf_bar +
                 '</div>'
-
                 '<div class="scanova-insight-section">'
                 '<span class="scanova-insight-label">What it means</span>'
                 f'<p class="scanova-insight-body">{_means}</p>'
                 '</div>'
-
                 '<div class="scanova-insight-section">'
                 '<span class="scanova-insight-label">What next?</span>'
                 '<div class="scanova-insight-next">'
@@ -869,39 +878,25 @@ if uploaded_file is not None:
                 f'<span>{_next}</span>'
                 '</div>'
                 '</div>'
-
                 '<div class="scanova-insight-section">'
                 '<span class="scanova-insight-label">Learn more</span>'
                 f'<p class="scanova-insight-learn">{_learn}</p>'
                 '</div>'
-
                 '</div>'
             )
-
             st.markdown(_insight_html, unsafe_allow_html=True)
+        except Exception:
+            pass
 
-        except Exception as _insight_err:
-            pass  # fail silently if insight card cannot render
-                # ===== Explainability Module =====
-        from backend.explainer import explain_reconstruction_error
-
-        # Use the DL anomaly map if available, else statistical
-        if st.session_state.get("dl_results") and st.session_state.get("compare_mode"):
-            _explain_map = None  # not stored directly; skip for compare
-        else:
-            _explain_map = None
-
-        # We use the anomaly map stored in the analysis (not retained).
-        # Instead, use the regions + report data for a text-based explanation.
-        _modality_code = "chest_xray"
-        if "Brain" in st.session_state.get("analysis_mode", ""):
-            _modality_code = "brain_mri"
-
+        # ===== Explainability Module =====
         try:
-            # Reconstruct a lightweight explanation from regions + report
-            # We don't have the raw map here, so pass a synthetic one.
+            from backend.explainer import explain_reconstruction_error
             import numpy as _np
+
             _synthetic_map = _np.zeros((128, 128), dtype=_np.float32)
+            _modality_code = "chest_xray"
+            if "Brain" in st.session_state.get("analysis_mode", ""):
+                _modality_code = "brain_mri"
 
             _explanation = explain_reconstruction_error(
                 _synthetic_map,
@@ -909,7 +904,6 @@ if uploaded_file is not None:
                 modality=_modality_code,
             )
 
-            # Build hotspots display
             _hotspots_html = ""
             for i, hs in enumerate(_explanation.get("top_hotspots", []), 1):
                 _hotspots_html += (
@@ -925,15 +919,12 @@ if uploaded_file is not None:
                 '<span class="explainability-header-icon">🔥</span>'
                 '<span class="explainability-header-text">WHY THIS REGION WAS FLAGGED</span>'
                 '</div>'
-
                 '<div class="explainability-method">'
                 'METHOD: ' + _explanation["method"].upper() +
                 '</div>'
-
                 '<div class="explainability-body">'
                 + _explanation["headline"] + ' ' + _explanation["detail"] +
                 '</div>'
-
                 '<div class="explainability-note">'
                 '<strong>⚠️ Honest note:</strong> '
                 + _explanation["honest_note"] +
@@ -956,43 +947,46 @@ if uploaded_file is not None:
                 )
 
             _exp_html += '</div>'
-
             st.markdown(_exp_html, unsafe_allow_html=True)
+        except Exception:
+            pass
 
-        except Exception as _e:
-            pass  # silently skip if explanation fails
+        # ===== View Mode: Patient / Clinical =====
+        try:
+            from backend.report import patient_explanation, clinical_explanation
+            current_view = st.session_state.get("view_mode", "clinical")
 
-        current_view = st.session_state.get("view_mode", "clinical")
+            if current_view == "patient":
+                _explanation_view_html = (
+                    '<div class="explanation-patient">'
+                    '<div class="explanation-patient-header">'
+                    '💬 <span>What this means — in plain language</span>'
+                    '</div>'
+                    '<div class="explanation-patient-body">'
+                    + patient_explanation(r) +
+                    '</div>'
+                    '<div class="explanation-patient-note">'
+                    'This is not a diagnosis. Always consult a qualified '
+                    'healthcare professional for medical decisions.'
+                    '</div>'
+                    '</div>'
+                )
+            else:
+                _explanation_view_html = (
+                    '<div class="explanation-clinical">'
+                    '<div class="explanation-clinical-header">'
+                    '⚡ Technical Summary'
+                    '</div>'
+                    '<div class="explanation-clinical-body">'
+                    + clinical_explanation(r) +
+                    '</div>'
+                    '</div>'
+                )
+            st.markdown(_explanation_view_html, unsafe_allow_html=True)
+        except Exception:
+            pass
 
-        if current_view == "patient":
-            _explanation_html = (
-                '<div class="explanation-patient">'
-                '<div class="explanation-patient-header">'
-                '💬 <span>What this means — in plain language</span>'
-                '</div>'
-                '<div class="explanation-patient-body">'
-                + patient_explanation(r) +
-                '</div>'
-                '<div class="explanation-patient-note">'
-                'This is not a diagnosis. Always consult a qualified '
-                'healthcare professional for medical decisions.'
-                '</div>'
-                '</div>'
-            )
-        else:
-            _explanation_html = (
-                '<div class="explanation-clinical">'
-                '<div class="explanation-clinical-header">'
-                '⚡ Technical Summary'
-                '</div>'
-                '<div class="explanation-clinical-body">'
-                + clinical_explanation(r) +
-                '</div>'
-                '</div>'
-            )
-
-        st.markdown(_explanation_html, unsafe_allow_html=True)
-
+        # ===== Result-level disclaimer =====
         _result_disc = (
             '<div class="result-disclaimer">'
             '<strong>Interpretation reminder:</strong> This is a preliminary '

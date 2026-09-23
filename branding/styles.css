@@ -2096,3 +2096,100 @@ hr {
         font-size: 1.2rem;
     }
 }
+/* ============================================
+   JUDGE MODE BANNER
+   ============================================ */
+
+.judge-banner {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    border-left: 6px solid #0ea5e9;
+    border-radius: 14px;
+    padding: 1.5rem 1.75rem;
+    margin: 1.5rem 0 1rem 0;
+    color: #ffffff;
+    box-shadow: 0 12px 32px rgba(14, 165, 233, 0.15);
+}
+
+.judge-banner-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 0.75rem;
+}
+
+.judge-banner-step {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    color: #0ea5e9;
+    text-transform: uppercase;
+}
+
+.judge-banner-progress-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1;
+    max-width: 260px;
+}
+
+.judge-banner-progress-bar {
+    flex: 1;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 100px;
+    overflow: hidden;
+}
+
+.judge-banner-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #0ea5e9, #8b5cf6);
+    border-radius: 100px;
+    transition: width 0.4s ease;
+}
+
+.judge-banner-progress-text {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #cbd5e1;
+    letter-spacing: 0.1em;
+    min-width: 40px;
+    text-align: right;
+}
+
+.judge-banner-title {
+    font-family: 'Inter', sans-serif;
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.5rem;
+}
+
+.judge-banner-message {
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    color: #cbd5e1;
+    line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+    .judge-banner {
+        padding: 1.25rem 1.25rem;
+    }
+    .judge-banner-top {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    .judge-banner-title {
+        font-size: 1.1rem;
+    }
+    .judge-banner-progress-wrap {
+        max-width: 100%;
+        width: 100%;
+    }
+}
