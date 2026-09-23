@@ -72,6 +72,130 @@ except Exception:
     pass
 
 
+# ==========================================================
+# AI VS HUMAN CHALLENGE INIT
+# ==========================================================
+try:
+    from backend.challenge_mode import (
+        init_challenge,
+        get_current_case,
+        record_guess,
+        next_round,
+        reset_challenge,
+        exit_challenge,
+    )
+    init_challenge()
+except Exception:
+    pass
+
+
+# ==========================================================
+# AI VS HUMAN CHALLENGE VIEW (full page takeover)
+# ==========================================================
+if st.session_state.get("challenge_active", False):
+
+    st.markdown(
+        '<div class="challenge-banner">'
+        '<div class="challenge-banner-title">🧠 SCANOVA CHALLENGE</div>'
+        '<div class="challenge-banner-subtitle">'
+        'Can you beat the AI? 5 rounds · educational demo only'
+        '</div>'
+        '</div>',
+        unsafe_allow_html=True
+    )
+
+    # Scoreboard
+    st.markdown(
+        '<div class="challenge-score-display">'
+        '<div class="challenge-score-card you">'
+        '<div class="challenge-score-label">Your Score</div>'
+        f'<div class="challenge-score-value">{st.session_state.challenge_score_user} / 5</div>'
+        '</div>'
+        '<div class="challenge-score-card ai">'
+        '<div class="challenge-score-label">SCANOVA AI</div>'
+        f'<div class="challenge-score-value">{st.session_state.challenge_score_ai} / 5</div>'
+        '</div>'
+        '</div>',
+        unsafe_allow_html=True
+    )
+
+    if st.session_state.challenge_finished:
+        st.success("🎉 Challenge complete!")
+        if st.session_state.challenge_score_user > st.session_state.challenge_score_ai:
+            st.balloons()
+            st.markdown("### 🏆 You beat the AI!")
+        elif st.session_state.challenge_score_user == st.session_state.challenge_score_ai:
+            st.info("### 🤝 It's a tie!")
+        else:
+            st.info("### 🤖 The AI won this time.")
+
+        col_a, col_b = st.columns(2)
+        with col_a:
+            if st.button("🔁 Play Again", use_container_width=True):
+                reset_challenge()
+                st.rerun()
+        with col_b:
+            if st.button("✕ Exit Challenge", use_container_width=True):
+                exit_challenge()
+                st.rerun()
+
+        st.stop()
+
+    # Current round
+    case = get_current_case()
+    st.markdown(
+        f'<div class="challenge-round-indicator">Round {st.session_state.challenge_round + 1} of 5</div>',
+        unsafe_allow_html=True
+    )
+
+    col_img, col_guess = st.columns([1, 1])
+
+    with col_img:
+        try:
+            st.image(case["image_path"], use_container_width=True)
+        except Exception:
+            st.info("Sample image unavailable.")
+
+    with col_guess:
+        st.markdown("#### What do you think?")
+        st.caption("Look at the image, then choose your answer.")
+
+        guess = st.radio(
+            "Your answer",
+            ["🟢 Normal", "🟠 Possible Abnormality"],
+            key=f"guess_round_{st.session_state.challenge_round}"
+        )
+
+        if not st.session_state.challenge_revealed:
+            if st.button("Submit Guess", type="primary", use_container_width=True):
+                g = "normal" if "Normal" in guess else "possible_abnormality"
+                record_guess(g)
+                st.rerun()
+        else:
+            ai_label = case["label"].replace("_", " ").title()
+            st.markdown(
+                '<div class="challenge-verdict">'
+                '<div class="challenge-verdict-title">🤖 SCANOVA AI Result</div>'
+                f'<div class="challenge-verdict-body">'
+                f'<strong>Prediction:</strong> {ai_label}<br>'
+                f'<strong>Explanation:</strong> {case["explanation"]}'
+                f'</div>'
+                '</div>',
+                unsafe_allow_html=True
+            )
+
+            if st.button("Next Round →", type="primary", use_container_width=True):
+                next_round()
+                st.rerun()
+
+    st.divider()
+    if st.button("✕ Exit Challenge", key="challenge_exit_mid"):
+        exit_challenge()
+        st.rerun()
+
+    st.stop()
+
+
 # ---------- Top Announcement Banner ----------
 _banner_html = (
     '<div class="top-banner">'
@@ -113,7 +237,6 @@ st.markdown(_disc_html, unsafe_allow_html=True)
 hero_stats = get_stats()
 
 
-# ---- Load the 3 modality hero images ----
 def _load_img_b64(path):
     try:
         with open(path, "rb") as f:
@@ -238,7 +361,7 @@ _primary_opts_html = (
 st.markdown(_primary_opts_html, unsafe_allow_html=True)
 
 
-# ---- Functional action buttons ----
+# ---- Action buttons ----
 btn_col1, btn_col2, btn_col3 = st.columns(3)
 
 with btn_col1:
@@ -254,7 +377,7 @@ with btn_col3:
         st.info("💡 **Upload a bone X-ray below.**")
 
 
-# ---- How it works flow (horizontal) ----
+# ---- How it works flow ----
 _flow_html = (
     '<div class="flow-container">'
     '<div class="flow-title">🔬 How SCANOVA Works</div>'
@@ -376,6 +499,10 @@ with st.sidebar:
     if st.button("🏆 Judge Mode", use_container_width=True, key="judge_start_btn"):
         st.session_state.judge_mode = True
         st.session_state.judge_step = 0
+        st.rerun()
+    if st.button("🧠 AI vs Human Challenge", use_container_width=True, key="challenge_start_btn"):
+        st.session_state.challenge_active = True
+        reset_challenge()
         st.rerun()
 
     st.divider()
@@ -566,7 +693,6 @@ if uploaded_file is not None:
             }
             selected_modality = modality_map.get(modality_choice, "auto")
 
-            # ---- Statistical ----
             stat_start = time.time()
             anomaly_map_stat = detect_anomalies(enhanced, block_size=block_size)
             regions_stat = find_anomaly_regions(anomaly_map_stat, threshold=sensitivity)
@@ -576,7 +702,6 @@ if uploaded_file is not None:
             report_stat = generate_report(anomaly_map_stat, regions_stat, threshold=sensitivity)
             stat_time = time.time() - stat_start
 
-            # ---- Deep Learning ----
             anomaly_map_dl = None
             regions_dl = []
             heat_dl = None
@@ -595,7 +720,6 @@ if uploaded_file is not None:
                     report_dl = generate_report(anomaly_map_dl, regions_dl, threshold=sensitivity)
                 dl_time = time.time() - dl_start
 
-            # ---- Primary ----
             if "Compare" in current_mode and anomaly_map_dl is not None:
                 anomaly_map, regions, raw_heat, overlay, report = (
                     anomaly_map_dl, regions_dl, heat_dl, overlay_dl, report_dl
@@ -654,7 +778,6 @@ if uploaded_file is not None:
     # ---------- Display Results ----------
     if st.session_state.get("original") is not None:
 
-        # ===== COMPARE MODE =====
         stored_mode = st.session_state.get("analysis_mode", "")
         is_compare = st.session_state.get("compare_mode", False) or "Compare" in stored_mode
         has_dl = st.session_state.get("dl_results") is not None
@@ -720,7 +843,6 @@ if uploaded_file is not None:
                 "Compare the heatmaps and regions to see the difference."
             )
 
-        # ===== SINGLE ENGINE =====
         else:
             st.divider()
             _single_header = (
