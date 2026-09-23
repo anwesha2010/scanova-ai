@@ -57,7 +57,7 @@ except Exception:
 
 
 # ---------- Top Announcement Banner ----------
-st.markdown(
+_banner_html = (
     '<div class="top-banner">'
     '<div class="top-banner-content">'
     '<span class="top-banner-pill">NEW</span>'
@@ -67,27 +67,28 @@ st.markdown(
     '</span>'
     '<span class="top-banner-arrow">→</span>'
     '</div>'
-    '</div>',
-    unsafe_allow_html=True
+    '</div>'
 )
+st.markdown(_banner_html, unsafe_allow_html=True)
 
 
 # ==========================================================
-# MEDICAL DISCLAIMER (prominent, top of page)
+# MEDICAL DISCLAIMER
 # ==========================================================
-st.markdown("""
-<div class="medical-disclaimer">
-    <div class="medical-disclaimer-title">⚠️ IMPORTANT — Please Read Before Using</div>
-    <div class="medical-disclaimer-body">
-        <strong>SCANOVA is an educational and research prototype.</strong>
-        It is <strong>not a medical device</strong> and does not replace a radiologist,
-        physician, or other qualified healthcare professional.
-        Results may be incorrect. Do not use SCANOVA as the sole basis
-        for any medical decision. Always consult a qualified healthcare
-        professional for diagnosis and treatment.
-    </div>
-</div>
-""", unsafe_allow_html=True)
+_disc_html = (
+    '<div class="medical-disclaimer">'
+    '<div class="medical-disclaimer-title">⚠️ IMPORTANT — Please Read Before Using</div>'
+    '<div class="medical-disclaimer-body">'
+    '<strong>SCANOVA is an educational and research prototype.</strong> '
+    'It is <strong>not a medical device</strong> and does not replace a radiologist, '
+    'physician, or other qualified healthcare professional. '
+    'Results may be incorrect. Do not use SCANOVA as the sole basis '
+    'for any medical decision. Always consult a qualified healthcare '
+    'professional for diagnosis and treatment.'
+    '</div>'
+    '</div>'
+)
+st.markdown(_disc_html, unsafe_allow_html=True)
 
 
 # ==========================================================
@@ -95,144 +96,187 @@ st.markdown("""
 # ==========================================================
 hero_stats = get_stats()
 
+
+# ---- Load the 3 modality hero images ----
+def _load_img_b64(path):
+    try:
+        with open(path, "rb") as f:
+            return base64.b64encode(f.read()).decode()
+    except Exception:
+        return None
+
+
+img_xray_b64 = _load_img_b64("branding/hero_xray.png")
+img_mri_b64 = _load_img_b64("branding/hero_mri.png")
+img_bone_b64 = _load_img_b64("branding/hero_bone.png")
+
+
+def _img_tag(b64, alt):
+    if b64:
+        return '<img src="data:image/png;base64,' + b64 + '" alt="' + alt + '" />'
+    return (
+        '<div style="width:100%;height:100%;display:flex;'
+        'align-items:center;justify-content:center;'
+        'background:#1e293b;color:#64748b;font-size:2rem;">🩻</div>'
+    )
+
+
+hero_xray_tag = _img_tag(img_xray_b64, "Chest X-ray")
+hero_mri_tag = _img_tag(img_mri_b64, "Brain MRI")
+hero_bone_tag = _img_tag(img_bone_b64, "Bone X-ray")
+
+
 # ---- Brand block ----
-st.markdown("""
-<div class="scanova-brand-block">
-    <div class="scanova-brand-tag">SEE · ANALYZE · EXPLAIN</div>
-    <h1 class="scanova-brand-name">SCANOVA</h1>
-    <p class="scanova-brand-subtitle">
-        An AI-powered medical imaging assistant that helps you
-        <strong>see</strong> what the model sees, <strong>analyze</strong>
-        what it found, and <strong>explain</strong> the results in plain language.
-    </p>
-</div>
-""", unsafe_allow_html=True)
+_brand_html = (
+    '<div class="scanova-brand-block">'
+    '<div class="scanova-brand-tag">SEE · ANALYZE · EXPLAIN</div>'
+    '<h1 class="scanova-brand-name">SCANOVA</h1>'
+    '<p class="scanova-brand-subtitle">'
+    'An AI-powered medical imaging assistant that helps you '
+    '<strong>see</strong> what the model sees, <strong>analyze</strong> '
+    'what it found, and <strong>explain</strong> the results in plain language.'
+    '</p>'
+    '</div>'
+)
+st.markdown(_brand_html, unsafe_allow_html=True)
+
+
+# ---- 3-image hero grid ----
+_hero_grid_html = (
+    '<div class="hero-modality-grid">'
+
+    '<div class="hero-modality-card m-xray">'
+    '<div class="hero-modality-image">'
+    + hero_xray_tag +
+    '<div class="hero-modality-label">'
+    '<span class="hero-modality-label-icon">🩻</span>'
+    '<span class="hero-modality-label-text">Chest X-Ray</span>'
+    '</div>'
+    '</div>'
+    '<div class="hero-modality-footer">'
+    '<span class="hero-modality-name">Chest X-Ray</span>'
+    '<span class="hero-modality-badge">Production</span>'
+    '</div>'
+    '</div>'
+
+    '<div class="hero-modality-card m-mri">'
+    '<div class="hero-modality-image">'
+    + hero_mri_tag +
+    '<div class="hero-modality-label">'
+    '<span class="hero-modality-label-icon">🧠</span>'
+    '<span class="hero-modality-label-text">Brain MRI</span>'
+    '</div>'
+    '</div>'
+    '<div class="hero-modality-footer">'
+    '<span class="hero-modality-name">Brain MRI</span>'
+    '<span class="hero-modality-badge">Research</span>'
+    '</div>'
+    '</div>'
+
+    '<div class="hero-modality-card m-bone">'
+    '<div class="hero-modality-image">'
+    + hero_bone_tag +
+    '<div class="hero-modality-label">'
+    '<span class="hero-modality-label-icon">🦴</span>'
+    '<span class="hero-modality-label-text">Bone X-Ray</span>'
+    '</div>'
+    '</div>'
+    '<div class="hero-modality-footer">'
+    '<span class="hero-modality-name">Bone X-Ray</span>'
+    '<span class="hero-modality-badge">Research</span>'
+    '</div>'
+    '</div>'
+
+    '</div>'
+
+    '<div class="hero-modality-caption">'
+    '<strong>THREE MODALITIES</strong> · ONE AI ASSISTANT'
+    '</div>'
+)
+st.markdown(_hero_grid_html, unsafe_allow_html=True)
+
 
 # ---- Three primary options ----
-st.markdown("""
-<div class="primary-options">
-    <div class="primary-option xray">
-        <span class="primary-option-icon">🫁</span>
-        <div class="primary-option-title">X-Ray Analysis</div>
-        <div class="primary-option-desc">
-            Chest and general X-ray images. Best results with clear, frontal views.
-        </div>
-        <span class="primary-option-cta">SCAN NOW →</span>
-    </div>
-    <div class="primary-option ct">
-        <span class="primary-option-icon">🧠</span>
-        <div class="primary-option-title">CT Scan</div>
-        <div class="primary-option-desc">
-            Chest CT images — single-slice or DICOM. Detects structural irregularities.
-        </div>
-        <span class="primary-option-cta">SCAN NOW →</span>
-    </div>
-    <div class="primary-option bone">
-        <span class="primary-option-icon">🦴</span>
-        <div class="primary-option-title">Bone X-Ray</div>
-        <div class="primary-option-desc">
-            Bone and fracture-related images. Surfaces density discontinuities.
-        </div>
-        <span class="primary-option-cta">SCAN NOW →</span>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# ---- How it works flow ----
-# ---- How it works flow (horizontal) ----
-st.markdown("""
-<div class="flow-container">
-    <div class="flow-title">🔬 How SCANOVA Works</div>
-    <div class="flow-horizontal">
-        <div class="flow-step-h s1">
-            <div class="flow-step-num">1</div>
-            <span class="flow-step-icon">📤</span>
-            <div class="flow-step-label">Image<br>Upload</div>
-        </div>
-        <div class="flow-step-h s2">
-            <div class="flow-step-num">2</div>
-            <span class="flow-step-icon">✅</span>
-            <div class="flow-step-label">Quality<br>Check</div>
-        </div>
-        <div class="flow-step-h s3">
-            <div class="flow-step-num">3</div>
-            <span class="flow-step-icon">🧠</span>
-            <div class="flow-step-label">AI<br>Analysis</div>
-        </div>
-        <div class="flow-step-h s4">
-            <div class="flow-step-num">4</div>
-            <span class="flow-step-icon">🔥</span>
-            <div class="flow-step-label">Explainable<br>AI</div>
-        </div>
-        <div class="flow-step-h s5">
-            <div class="flow-step-num">5</div>
-            <span class="flow-step-icon">💬</span>
-            <div class="flow-step-label">Patient<br>Insight</div>
-        </div>
-        <div class="flow-step-h s6">
-            <div class="flow-step-num">6</div>
-            <span class="flow-step-icon">👨‍⚕️</span>
-            <div class="flow-step-label">Professional<br>Review</div>
-        </div>
-    </div>
-</div>
-""", unsafe_allow_html=True)
-
-# ---- Preserve the original hero image (secondary visual) ----
-try:
-    with open("branding/hero_image.png", "rb") as f:
-        hero_img_b64 = base64.b64encode(f.read()).decode()
-    st.markdown(
-        f'<div style="max-width:520px; margin: 0 auto 2rem auto;">'
-        f'<div class="hero-image-wrap" style="transform: rotate(0deg); margin: 0 auto;">'
-        f'<img src="data:image/png;base64,{hero_img_b64}" alt="SCANOVA hero" />'
-        f'<div class="hero-image-badge">Live scan preview</div>'
-        f'</div>'
-        f'</div>',
-        unsafe_allow_html=True
-    )
-except FileNotFoundError:
-    pass
-
-
-# ==========================================================
-# MODALITY GRID
-# ==========================================================
-st.markdown(
-    '<div class="modality-section">'
-    '<div class="modality-eyebrow">SUPPORTED MODALITIES</div>'
-    '<h2 class="modality-title">One tool. <em>Four scan types.</em></h2>'
-    '<p class="modality-desc">SCANOVA ships with four specialized neural networks — one per modality — plus an auto-router that picks the right one.</p>'
-    '</div>',
-    unsafe_allow_html=True
+_primary_opts_html = (
+    '<div class="primary-options">'
+    '<div class="primary-option xray">'
+    '<span class="primary-option-icon">🫁</span>'
+    '<div class="primary-option-title">X-Ray Analysis</div>'
+    '<div class="primary-option-desc">Chest and general X-ray images. Best results with clear, frontal views.</div>'
+    '<span class="primary-option-cta">SCAN NOW →</span>'
+    '</div>'
+    '<div class="primary-option ct">'
+    '<span class="primary-option-icon">🧠</span>'
+    '<div class="primary-option-title">CT Scan</div>'
+    '<div class="primary-option-desc">Chest CT images — single-slice or DICOM. Detects structural irregularities.</div>'
+    '<span class="primary-option-cta">SCAN NOW →</span>'
+    '</div>'
+    '<div class="primary-option bone">'
+    '<span class="primary-option-icon">🦴</span>'
+    '<div class="primary-option-title">Bone X-Ray</div>'
+    '<div class="primary-option-desc">Bone and fracture-related images. Surfaces density discontinuities.</div>'
+    '<span class="primary-option-cta">SCAN NOW →</span>'
+    '</div>'
+    '</div>'
 )
+st.markdown(_primary_opts_html, unsafe_allow_html=True)
 
-mod_col1, mod_col2, mod_col3, mod_col4 = st.columns(4)
 
-cards = [
-    ("c1", "01 / 04", "🩻", "Chest X-rays",
-     "Production-ready. Trained on 500 frontal chest X-rays. Detects density variations in lung fields."),
-    ("c2", "02 / 04", "🧠", "Brain MRI",
-     "Trained on 500 normal brain MRIs. Flags asymmetric regions and abnormal signal patterns."),
-    ("c3", "03 / 04", "🫁", "Chest CT",
-     "Trained on 100 chest CT slices. Highlights structural irregularities in lung tissue."),
-    ("c4", "04 / 04", "🦴", "Bone Scan",
-     "Trained on 500 bone X-rays. Surfaces density discontinuities in long bones and joints."),
-]
+# ---- Functional action buttons ----
+btn_col1, btn_col2, btn_col3 = st.columns(3)
 
-for col, (cls, num, icon, title, desc) in zip(
-    [mod_col1, mod_col2, mod_col3, mod_col4], cards
-):
-    with col:
-        st.markdown(
-            f'<div class="modality-card {cls}">'
-            f'<span class="modality-card-number">{num}</span>'
-            f'<span class="modality-card-icon">{icon}</span>'
-            f'<h3 class="modality-card-title">{title}</h3>'
-            f'<p class="modality-card-desc">{desc}</p>'
-            f'</div>',
-            unsafe_allow_html=True
-        )
+with btn_col1:
+    if st.button("🫁 Scan X-Ray →", use_container_width=True, key="btn_xray"):
+        st.info("💡 **Upload a chest X-ray below.** Or click 🎯 Try Sample for a demo.")
+
+with btn_col2:
+    if st.button("🧠 Scan CT →", use_container_width=True, key="btn_ct"):
+        st.info("💡 **Upload a CT image below.** PNG, JPG, or DICOM accepted.")
+
+with btn_col3:
+    if st.button("🦴 Scan Bone →", use_container_width=True, key="btn_bone"):
+        st.info("💡 **Upload a bone X-ray below.**")
+
+
+# ---- How it works flow (horizontal) ----
+_flow_html = (
+    '<div class="flow-container">'
+    '<div class="flow-title">🔬 How SCANOVA Works</div>'
+    '<div class="flow-horizontal">'
+    '<div class="flow-step-h s1">'
+    '<div class="flow-step-num">1</div>'
+    '<span class="flow-step-icon">📤</span>'
+    '<div class="flow-step-label">Image<br>Upload</div>'
+    '</div>'
+    '<div class="flow-step-h s2">'
+    '<div class="flow-step-num">2</div>'
+    '<span class="flow-step-icon">✅</span>'
+    '<div class="flow-step-label">Quality<br>Check</div>'
+    '</div>'
+    '<div class="flow-step-h s3">'
+    '<div class="flow-step-num">3</div>'
+    '<span class="flow-step-icon">🧠</span>'
+    '<div class="flow-step-label">AI<br>Analysis</div>'
+    '</div>'
+    '<div class="flow-step-h s4">'
+    '<div class="flow-step-num">4</div>'
+    '<span class="flow-step-icon">🔥</span>'
+    '<div class="flow-step-label">Explainable<br>AI</div>'
+    '</div>'
+    '<div class="flow-step-h s5">'
+    '<div class="flow-step-num">5</div>'
+    '<span class="flow-step-icon">💬</span>'
+    '<div class="flow-step-label">Patient<br>Insight</div>'
+    '</div>'
+    '<div class="flow-step-h s6">'
+    '<div class="flow-step-num">6</div>'
+    '<span class="flow-step-icon">👨‍⚕️</span>'
+    '<div class="flow-step-label">Professional<br>Review</div>'
+    '</div>'
+    '</div>'
+    '</div>'
+)
+st.markdown(_flow_html, unsafe_allow_html=True)
 
 
 # ==========================================================
@@ -242,16 +286,17 @@ with st.sidebar:
     st.markdown("### ⚙️ Analysis Settings")
     st.caption("Tune how sensitive the AI should be.")
 
-    st.markdown("""
-    <div class="privacy-notice">
-        <div class="privacy-notice-title">🔐 Privacy Notice</div>
-        <div class="privacy-notice-body">
-            Do not upload identifiable patient information
-            (names, IDs, dates of birth). Images are processed
-            in memory only — nothing is stored, logged, or shared.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    _priv_html = (
+        '<div class="privacy-notice">'
+        '<div class="privacy-notice-title">🔐 Privacy Notice</div>'
+        '<div class="privacy-notice-body">'
+        'Do not upload identifiable patient information '
+        '(names, IDs, dates of birth). Images are processed '
+        'in memory only — nothing is stored, logged, or shared.'
+        '</div>'
+        '</div>'
+    )
+    st.markdown(_priv_html, unsafe_allow_html=True)
 
     if DL_AVAILABLE:
         analysis_mode = st.radio(
@@ -325,26 +370,39 @@ with col_left:
     )
 
 with col_right:
-    st.markdown(f"""
-<div class="live-card">
-<div class="live-card-header"><span class="live-card-title">Live Session</span><span class="live-pulse">Active</span></div>
-<div class="live-stat-row"><span class="live-stat-label">Scans this session</span><span class="live-stat-value accent">{hero_stats['total']}</span></div>
-<div class="live-stat-row"><span class="live-stat-label">Avg analysis time</span><span class="live-stat-value">{hero_stats['avg_time']}s</span></div>
-<div class="live-stat-row"><span class="live-stat-label">Safe / Warn / Danger</span><span class="live-stat-value" style="font-size: 1rem;">{hero_stats['safe']} / {hero_stats['warning']} / {hero_stats['danger']}</span></div>
-</div>
-""", unsafe_allow_html=True)
+    _live_card_html = (
+        '<div class="live-card">'
+        '<div class="live-card-header">'
+        '<span class="live-card-title">Live Session</span>'
+        '<span class="live-pulse">Active</span>'
+        '</div>'
+        '<div class="live-stat-row">'
+        '<span class="live-stat-label">Scans this session</span>'
+        f'<span class="live-stat-value accent">{hero_stats["total"]}</span>'
+        '</div>'
+        '<div class="live-stat-row">'
+        '<span class="live-stat-label">Avg analysis time</span>'
+        f'<span class="live-stat-value">{hero_stats["avg_time"]}s</span>'
+        '</div>'
+        '<div class="live-stat-row">'
+        '<span class="live-stat-label">Safe / Warn / Danger</span>'
+        f'<span class="live-stat-value" style="font-size: 1rem;">{hero_stats["safe"]} / {hero_stats["warning"]} / {hero_stats["danger"]}</span>'
+        '</div>'
+        '</div>'
+    )
+    st.markdown(_live_card_html, unsafe_allow_html=True)
 
 
 # ---------- Upload Section ----------
-st.markdown(
+_upload_header_html = (
     '<a id="upload"></a>'
     '<div class="section-header">'
     '<span class="section-header-icon">📤</span>'
     '<div><h2 class="section-header-text">Upload Medical Image</h2>'
     '<p class="section-header-desc">Supported formats: PNG · JPG · DICOM (.dcm)</p></div>'
-    '</div>',
-    unsafe_allow_html=True
+    '</div>'
 )
+st.markdown(_upload_header_html, unsafe_allow_html=True)
 
 
 # ---------- Upload ----------
@@ -411,9 +469,9 @@ if uploaded_file is not None:
             modality_map = {
                 "🌐 Auto-detect": "auto",
                 "🩻 Chest X-ray": "chest_xray",
-                "🧠 Brain MRI":  "brain_mri",
-                "🫁 Chest CT":   "chest_ct",
-                "🦴 Bone Scan":  "bone_scan",
+                "🧠 Brain MRI": "brain_mri",
+                "🫁 Chest CT": "chest_ct",
+                "🦴 Bone Scan": "bone_scan",
             }
             selected_modality = modality_map.get(modality_choice, "auto")
 
@@ -512,14 +570,15 @@ if uploaded_file is not None:
 
         if is_compare and has_dl:
             st.divider()
-            st.markdown(
+
+            _comp_header = (
                 '<div class="section-header">'
                 '<span class="section-header-icon">⚖️</span>'
                 '<div><h2 class="section-header-text">Side-by-Side Comparison</h2>'
                 '<p class="section-header-desc">Same image, two AI engines</p></div>'
-                '</div>',
-                unsafe_allow_html=True
+                '</div>'
             )
+            st.markdown(_comp_header, unsafe_allow_html=True)
 
             stat = st.session_state.stat_results
             dl = st.session_state.dl_results
@@ -528,8 +587,7 @@ if uploaded_file is not None:
 
             if stack_compare:
                 st.markdown("### ⚡ Statistical Engine")
-                st.image(stat["overlay"], use_container_width=True,
-                         caption="Detection Overlay")
+                st.image(stat["overlay"], use_container_width=True, caption="Detection Overlay")
                 c1, c2, c3, c4 = st.columns(4)
                 c1.metric("Regions", len(stat["regions"]))
                 c2.metric("Time", f"{stat['time']:.2f}s")
@@ -539,8 +597,7 @@ if uploaded_file is not None:
                 st.divider()
 
                 st.markdown("### 🧠 Deep Learning Engine")
-                st.image(dl["overlay"], use_container_width=True,
-                         caption="Detection Overlay")
+                st.image(dl["overlay"], use_container_width=True, caption="Detection Overlay")
                 c1, c2, c3, c4 = st.columns(4)
                 c1.metric("Regions", len(dl["regions"]))
                 c2.metric("Time", f"{dl['time']:.2f}s")
@@ -551,8 +608,7 @@ if uploaded_file is not None:
 
                 with col_stat:
                     st.markdown("### ⚡ Statistical Engine")
-                    st.image(stat["overlay"], use_container_width=True,
-                             caption="Detection Overlay")
+                    st.image(stat["overlay"], use_container_width=True, caption="Detection Overlay")
                     c1, c2 = st.columns(2)
                     c1.metric("Regions", len(stat["regions"]))
                     c2.metric("Time", f"{stat['time']:.2f}s")
@@ -562,8 +618,7 @@ if uploaded_file is not None:
 
                 with col_dl:
                     st.markdown("### 🧠 Deep Learning Engine")
-                    st.image(dl["overlay"], use_container_width=True,
-                             caption="Detection Overlay")
+                    st.image(dl["overlay"], use_container_width=True, caption="Detection Overlay")
                     c1, c2 = st.columns(2)
                     c1.metric("Regions", len(dl["regions"]))
                     c2.metric("Time", f"{dl['time']:.2f}s")
@@ -581,14 +636,14 @@ if uploaded_file is not None:
         else:
             st.divider()
 
-            st.markdown(
+            _single_header = (
                 '<div class="section-header">'
                 '<span class="section-header-icon">🖼️</span>'
                 '<div><h2 class="section-header-text">Analysis Results</h2>'
                 f'<p class="section-header-desc">Engine: {stored_mode or "Statistical"}</p></div>'
-                '</div>',
-                unsafe_allow_html=True
+                '</div>'
             )
+            st.markdown(_single_header, unsafe_allow_html=True)
 
             mobile_view = st.toggle("📱 Mobile View (stack images)", value=False)
 
@@ -617,14 +672,14 @@ if uploaded_file is not None:
         # ---------- Report ----------
         st.divider()
 
-        st.markdown(
+        _report_header = (
             '<div class="section-header">'
             '<span class="section-header-icon">📋</span>'
             '<div><h2 class="section-header-text">Analysis Report</h2>'
             '<p class="section-header-desc">Summary of detected patterns</p></div>'
-            '</div>',
-            unsafe_allow_html=True
+            '</div>'
         )
+        st.markdown(_report_header, unsafe_allow_html=True)
 
         r = st.session_state.report
 
@@ -644,17 +699,17 @@ if uploaded_file is not None:
 
         st.info(r["disclaimer"])
 
-        # Additional result-level disclaimer
-        st.markdown("""
-        <div class="result-disclaimer">
-            <strong>Interpretation reminder:</strong> This is a preliminary
-            AI screening result. "Regions Found" represents areas the model
-            could not reconstruct as well as the rest of the image —
-            this may be normal anatomy, image quality, or a real finding.
-            A qualified healthcare professional must review the image
-            and make all clinical decisions.
-        </div>
-        """, unsafe_allow_html=True)
+        _result_disc = (
+            '<div class="result-disclaimer">'
+            '<strong>Interpretation reminder:</strong> This is a preliminary '
+            'AI screening result. "Regions Found" represents areas the model '
+            'could not reconstruct as well as the rest of the image — '
+            'this may be normal anatomy, image quality, or a real finding. '
+            'A qualified healthcare professional must review the image '
+            'and make all clinical decisions.'
+            '</div>'
+        )
+        st.markdown(_result_disc, unsafe_allow_html=True)
 
         # ---------- Downloads ----------
         col_dl1, col_dl2 = st.columns(2)
@@ -694,14 +749,14 @@ if uploaded_file is not None:
 # ==========================================================
 st.divider()
 
-st.markdown(
+_faq_header = (
     '<div class="section-header">'
     '<span class="section-header-icon">❓</span>'
     '<div><h2 class="section-header-text">Frequently Asked Questions</h2>'
     '<p class="section-header-desc">Quick answers. Full FAQ on the dedicated page.</p></div>'
-    '</div>',
-    unsafe_allow_html=True
+    '</div>'
 )
+st.markdown(_faq_header, unsafe_allow_html=True)
 
 with st.expander("🩺 Is SCANOVA AI a medical device?"):
     st.markdown(
@@ -754,21 +809,21 @@ st.markdown(
 # ==========================================================
 # FOUNDER QUOTE
 # ==========================================================
-st.markdown(
+_founder_html = (
     '<div class="founder-quote">'
     '"We built SCANOVA because we watched radiologists drown in '
     'hundreds of scans a day. AI shouldn\'t replace them — it should '
     'give them back the time to think."'
     '<span class="attr">— <strong>Anwesha Rout</strong>, Founder · SCANOVA AI</span>'
-    '</div>',
-    unsafe_allow_html=True
+    '</div>'
 )
+st.markdown(_founder_html, unsafe_allow_html=True)
 
 
 # ==========================================================
 # FOOTER
 # ==========================================================
-st.markdown(
+_footer_html = (
     '<div class="app-footer">'
     '<div class="footer-line"><strong>SCANOVA AI</strong> — Medical Image Analysis Assistant</div>'
     '<div class="footer-line">Designed & built by the SCANOVA Team</div>'
@@ -780,7 +835,8 @@ st.markdown(
     '<span class="footer-badge">Streamlit</span>'
     '<span class="footer-badge">v3.0</span>'
     '</div>'
-    '<div class="footer-line" style="margin-top: 1rem; font-size: 0.75rem;">⚠️ Not for clinical use. Always consult a qualified radiologist.</div>'
-    '</div>',
-    unsafe_allow_html=True
+    '<div class="footer-line" style="margin-top: 1rem; font-size: 0.75rem;">'
+    '⚠️ Not for clinical use. Always consult a qualified radiologist.</div>'
+    '</div>'
 )
+st.markdown(_footer_html, unsafe_allow_html=True)
