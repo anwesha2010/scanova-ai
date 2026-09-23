@@ -211,6 +211,16 @@ def generate_pdf_report(report, overlay_img):
             "a qualified radiologist. SCANOVA AI is not a medical device."
         )
     story.append(Paragraph(str(disclaimer_text), body_style))
+        # Extended legal disclaimer
+    extended = (
+        "<b>Not a medical device.</b> SCANOVA is an educational/research "
+        "prototype. It does not replace a radiologist, physician, or other "
+        "qualified healthcare professional. Results may be incorrect. "
+        "Do not use this report as the sole basis for any medical decision. "
+        "Always consult a qualified healthcare professional for diagnosis "
+        "and treatment."
+    )
+    story.append(Paragraph(extended, body_style))
 
     story.append(Spacer(1, 0.2 * inch))
 

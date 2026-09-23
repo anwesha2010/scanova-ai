@@ -29,7 +29,7 @@ except Exception:
 
 # ---------- Page Setup ----------
 st.set_page_config(
-    page_title="SCANOVA AI — Medical Image Analysis",
+    page_title="SCANOVA 2.0 — AI Medical Imaging Assistant",
     page_icon="branding/favicon.png",
     layout="wide"
 )
@@ -70,6 +70,24 @@ st.markdown(
     '</div>',
     unsafe_allow_html=True
 )
+
+
+# ==========================================================
+# MEDICAL DISCLAIMER (prominent, top of page)
+# ==========================================================
+st.markdown("""
+<div class="medical-disclaimer">
+    <div class="medical-disclaimer-title">⚠️ IMPORTANT — Please Read Before Using</div>
+    <div class="medical-disclaimer-body">
+        <strong>SCANOVA is an educational and research prototype.</strong>
+        It is <strong>not a medical device</strong> and does not replace a radiologist,
+        physician, or other qualified healthcare professional.
+        Results may be incorrect. Do not use SCANOVA as the sole basis
+        for any medical decision. Always consult a qualified healthcare
+        professional for diagnosis and treatment.
+    </div>
+</div>
+""", unsafe_allow_html=True)
 
 
 # ==========================================================
@@ -149,6 +167,17 @@ for col, (cls, num, icon, title, desc) in zip(
 with st.sidebar:
     st.markdown("### ⚙️ Analysis Settings")
     st.caption("Tune how sensitive the AI should be.")
+
+    st.markdown("""
+    <div class="privacy-notice">
+        <div class="privacy-notice-title">🔐 Privacy Notice</div>
+        <div class="privacy-notice-body">
+            Do not upload identifiable patient information
+            (names, IDs, dates of birth). Images are processed
+            in memory only — nothing is stored, logged, or shared.
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     if DL_AVAILABLE:
         analysis_mode = st.radio(
@@ -300,7 +329,6 @@ if uploaded_file is not None:
         file_bytes = uploaded_file.read()
         start_time = time.time()
 
-        # Capture the current mode at analysis time
         current_mode = analysis_mode
 
         with st.spinner(f"Analyzing with {current_mode}..."):
@@ -360,7 +388,6 @@ if uploaded_file is not None:
 
         analysis_duration = time.time() - start_time
 
-        # Store results
         st.session_state.original = original
         st.session_state.processed = enhanced
         st.session_state.heatmap = raw_heat
@@ -542,6 +569,18 @@ if uploaded_file is not None:
             st.error(r["status"])
 
         st.info(r["disclaimer"])
+
+        # Additional result-level disclaimer
+        st.markdown("""
+        <div class="result-disclaimer">
+            <strong>Interpretation reminder:</strong> This is a preliminary
+            AI screening result. "Regions Found" represents areas the model
+            could not reconstruct as well as the rest of the image —
+            this may be normal anatomy, image quality, or a real finding.
+            A qualified healthcare professional must review the image
+            and make all clinical decisions.
+        </div>
+        """, unsafe_allow_html=True)
 
         # ---------- Downloads ----------
         col_dl1, col_dl2 = st.columns(2)
