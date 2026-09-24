@@ -8,7 +8,18 @@ from sklearn.metrics import (
 )
 
 from backend.dl_analyzer import predict_pneumonia
-from backend.grad_cam import generate_gradcam
+
+# Try importing Grad-CAM (optional — requires torch, not available on Cloud free tier)
+try:
+    from backend.grad_cam import generate_gradcam
+    GRADCAM_AVAILABLE = True
+except Exception:
+    GRADCAM_AVAILABLE = False
+    def generate_gradcam(*args, **kwargs):
+        return {
+            "success": False,
+            "error": "Grad-CAM unavailable on this deployment (torch not installed).",
+        }
 
 
 # ==========================================================
@@ -77,9 +88,11 @@ images, labels = load_test_set()
 
 
 # ==========================================================
-# TABS — Metrics | Grad-CAM
+# TABS
 # ==========================================================
-tab_metrics, tab_gradcam = st.tabs(["📈 Live Metrics", "🔥 Grad-CAM Explainability"])
+tab_metrics, tab_gradcam = st.tabs(
+    ["📈 Live Metrics", "🔥 Grad-CAM Explainability"]
+)
 
 
 # ==========================================================
@@ -157,16 +170,18 @@ with tab_gradcam:
     st.info(
         "**What is Grad-CAM?** Gradient-weighted Class Activation Mapping uses "
         "gradients from the model's last convolutional layer to highlight the "
-        "regions that most influenced its prediction. This is REAL Grad-CAM — "
-        "not a reconstruction-error approximation."
+        "regions that most influenced its prediction."
     )
 
     st.divider()
 
-    # Let user pick an image
     image_source = st.radio(
         "Choose image source:",
-        ["Sample from test set (pneumonia)", "Sample from test set (normal)", "Upload your own"],
+        [
+            "Sample from test set (pneumonia)",
+            "Sample from test set (normal)",
+            "Upload your own",
+        ],
         horizontal=True,
     )
 
@@ -176,17 +191,25 @@ with tab_gradcam:
     if image_source == "Sample from test set (pneumonia)":
         files = sorted(os.listdir(PNEUMONIA_DIR))[:10]
         selected_file = st.selectbox("Pick a pneumonia image:", files)
-        selected_image = cv2.imread(os.path.join(PNEUMONIA_DIR, selected_file), cv2.IMREAD_GRAYSCALE)
+        selected_image = cv2.imread(
+            os.path.join(PNEUMONIA_DIR, selected_file),
+            cv2.IMREAD_GRAYSCALE,
+        )
         selected_label = f"Pneumonia: {selected_file}"
 
     elif image_source == "Sample from test set (normal)":
         files = sorted(os.listdir(NORMAL_DIR))[:10]
         selected_file = st.selectbox("Pick a normal image:", files)
-        selected_image = cv2.imread(os.path.join(NORMAL_DIR, selected_file), cv2.IMREAD_GRAYSCALE)
+        selected_image = cv2.imread(
+            os.path.join(NORMAL_DIR, selected_file),
+            cv2.IMREAD_GRAYSCALE,
+        )
         selected_label = f"Normal: {selected_file}"
 
     else:
-        uploaded = st.file_uploader("Upload a chest X-ray", type=["png", "jpg", "jpeg"])
+        uploaded = st.file_uploader(
+            "Upload a chest X-ray", type=["png", "jpg", "jpeg"]
+        )
         if uploaded is not None:
             import io
             from PIL import Image
@@ -197,14 +220,17 @@ with tab_gradcam:
     if selected_image is not None:
         st.divider()
 
-        # Run prediction
         prediction_result = predict_pneumonia(selected_image)
 
         col_a, col_b = st.columns(2)
 
         with col_a:
             st.markdown("#### 📷 Original")
-            st.image(selected_image, caption=selected_label, use_container_width=True)
+            st.image(
+                selected_image,
+                caption=selected_label,
+                use_container_width=True,
+            )
 
             st.markdown("#### 🎯 Prediction")
             pred = prediction_result["prediction"]
@@ -215,47 +241,68 @@ with tab_gradcam:
                 st.success(f"**{pred.upper()}** · Confidence: **{conf * 100:.1f}%**")
 
             st.markdown("**Probabilities:**")
-            st.markdown(f"- Normal: `{prediction_result['probabilities']['normal']:.3f}`")
-            st.markdown(f"- Pneumonia: `{prediction_result['probabilities']['pneumonia']:.3f}`")
+            st.markdown(
+                f"- Normal: `{prediction_result['probabilities']['normal']:.3f}`"
+            )
+            st.markdown(
+                f"- Pneumonia: `{prediction_result['probabilities']['pneumonia']:.3f}`"
+            )
 
         with col_b:
             st.markdown("#### 🔥 Grad-CAM Overlay")
-            gradcam_result = generate_gradcam(selected_image, target_class=1)
 
-            if gradcam_result["success"]:
-                st.image(
-                    gradcam_result["overlay"],
-                    caption="Grad-CAM: where the model looked",
-                    channels="BGR",
-                    use_container_width=True,
+            if not GRADCAM_AVAILABLE:
+                st.info(
+                    "**Grad-CAM runs on the local deployment.** "
+                    "Streamlit Cloud's free tier doesn't support PyTorch "
+                    "(required for gradient computation)."
                 )
-                st.caption(
-                    "**Red = high attention** | **Blue = low attention** "
-                    "| The model's decision was driven by the red regions."
+                st.markdown(
+                    "**Deployment note:** Grad-CAM is available in the "
+                    "local version of SCANOVA. During the InnoEx demo, we run "
+                    "the local app to show gradient-based explainability."
                 )
             else:
-                st.warning(
-                    f"Grad-CAM unavailable: {gradcam_result.get('error', 'unknown error')}"
+                gradcam_result = generate_gradcam(
+                    selected_image, target_class=1
                 )
+
+                if gradcam_result["success"]:
+                    st.image(
+                        gradcam_result["overlay"],
+                        caption="Grad-CAM: where the model looked",
+                        channels="BGR",
+                        use_container_width=True,
+                    )
+                    st.caption(
+                        "**Red = high attention** | **Blue = low attention** "
+                        "| The model's decision was driven by the red regions."
+                    )
+                else:
+                    st.warning(
+                        f"Grad-CAM unavailable: "
+                        f"{gradcam_result.get('error', 'unknown error')}"
+                    )
 
         st.divider()
         st.markdown("#### 💡 Interpretation")
         if prediction_result["prediction"] == "pneumonia":
             st.markdown(
-                "The model predicts **pneumonia**. The Grad-CAM heatmap shows which "
-                "regions of the X-ray influenced this decision. Radiologists look for "
-                "opacities, consolidation, or fluid in the lung fields — the model "
-                "is likely focusing on similar features."
+                "The model predicts **pneumonia**. The Grad-CAM heatmap shows "
+                "which regions of the X-ray influenced this decision. "
+                "Radiologists look for opacities, consolidation, or fluid in "
+                "the lung fields — the model is likely focusing on similar "
+                "features."
             )
         else:
             st.markdown(
-                "The model predicts **normal**. The Grad-CAM heatmap shows relatively "
-                "diffuse attention, which is consistent with a normal X-ray where no "
-                "single region dominates the decision."
+                "The model predicts **normal**. The Grad-CAM heatmap shows "
+                "relatively diffuse attention, which is consistent with a "
+                "normal X-ray where no single region dominates the decision."
             )
 
         st.caption(
-            "⚠️ **Note:** Grad-CAM is a visualization tool for research and education. "
-            "It does not provide a diagnosis. Always consult a qualified healthcare "
-            "professional."
+            "⚠️ **Note:** Grad-CAM is a visualization tool for research and "
+            "education. It does not provide a diagnosis. Always consult a "
+            "qualified healthcare professional."
         )
