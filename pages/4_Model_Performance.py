@@ -9,18 +9,37 @@ from sklearn.metrics import (
 
 from backend.dl_analyzer import predict_pneumonia
 
+
+# ==========================================================
+# PAGE SETUP
+# ==========================================================
 st.set_page_config(
     page_title="Model Performance — SCANOVA",
     page_icon="📊",
     layout="wide",
 )
 
+# Load custom CSS
 try:
     with open("branding/styles.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 except Exception:
     pass
 
+
+# ==========================================================
+# CACHE CLEAR BUTTON
+# ==========================================================
+col_clear, col_empty = st.columns([1, 4])
+with col_clear:
+    if st.button("🔄 Clear Cache", key="clear_cache_btn"):
+        st.cache_data.clear()
+        st.rerun()
+
+
+# ==========================================================
+# HEADER
+# ==========================================================
 st.title("📊 Model Performance")
 st.caption("Real accuracy, computed live on labeled test images.")
 
@@ -30,6 +49,10 @@ st.warning(
     "partnership and regulatory review."
 )
 
+
+# ==========================================================
+# TEST DATA PATHS
+# ==========================================================
 TEST_DIR = "test_data"
 NORMAL_DIR = os.path.join(TEST_DIR, "normal")
 PNEUMONIA_DIR = os.path.join(TEST_DIR, "pneumonia")
@@ -42,6 +65,9 @@ if not os.path.exists(NORMAL_DIR) or not os.path.exists(PNEUMONIA_DIR):
     st.stop()
 
 
+# ==========================================================
+# LOAD TEST SET
+# ==========================================================
 @st.cache_data(show_spinner=False)
 def load_test_set():
     images, labels = [], []
@@ -62,6 +88,10 @@ def load_test_set():
 
 images, labels = load_test_set()
 
+
+# ==========================================================
+# SHOW TEST SET INFO
+# ==========================================================
 st.markdown(f"### Test Set: {len(images)} images")
 c1, c2 = st.columns(2)
 c1.metric("Normal", int(np.sum(labels == 0)))
@@ -69,6 +99,10 @@ c2.metric("Pneumonia", int(np.sum(labels == 1)))
 
 st.divider()
 
+
+# ==========================================================
+# RUN EVALUATION
+# ==========================================================
 if st.button("🚀 Run Live Evaluation", type="primary"):
     with st.spinner(f"Running AI on {len(images)} images..."):
         predictions = []
