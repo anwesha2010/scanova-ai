@@ -90,7 +90,7 @@ except Exception:
 
 
 # ==========================================================
-# AI VS HUMAN CHALLENGE VIEW (full page takeover)
+# AI VS HUMAN CHALLENGE VIEW
 # ==========================================================
 if st.session_state.get("challenge_active", False):
 
@@ -98,13 +98,12 @@ if st.session_state.get("challenge_active", False):
         '<div class="challenge-banner">'
         '<div class="challenge-banner-title">🧠 SCANOVA CHALLENGE</div>'
         '<div class="challenge-banner-subtitle">'
-        'Can you beat the AI? 5 rounds · educational demo only'
+        'Can you beat the AI? 5 rounds · both scored honestly'
         '</div>'
         '</div>',
         unsafe_allow_html=True
     )
 
-    # Scoreboard
     st.markdown(
         '<div class="challenge-score-display">'
         '<div class="challenge-score-card you">'
@@ -121,6 +120,7 @@ if st.session_state.get("challenge_active", False):
 
     if st.session_state.challenge_finished:
         st.success("🎉 Challenge complete!")
+
         if st.session_state.challenge_score_user > st.session_state.challenge_score_ai:
             st.balloons()
             st.markdown("### 🏆 You beat the AI!")
@@ -128,6 +128,11 @@ if st.session_state.get("challenge_active", False):
             st.info("### 🤝 It's a tie!")
         else:
             st.info("### 🤖 The AI won this time.")
+
+        st.caption(
+            "⚠️ The AI's score is from real predictions, not a fixed outcome. "
+            "This is what honest evaluation looks like."
+        )
 
         col_a, col_b = st.columns(2)
         with col_a:
@@ -141,7 +146,6 @@ if st.session_state.get("challenge_active", False):
 
         st.stop()
 
-    # Current round
     case = get_current_case()
     st.markdown(
         f'<div class="challenge-round-indicator">Round {st.session_state.challenge_round + 1} of 5</div>',
@@ -151,9 +155,9 @@ if st.session_state.get("challenge_active", False):
     col_img, col_guess = st.columns([1, 1])
 
     with col_img:
-        try:
-            st.image(case["image_path"], use_container_width=True)
-        except Exception:
+        if case["image"] is not None:
+            st.image(case["image"], use_container_width=True)
+        else:
             st.info("Sample image unavailable.")
 
     with col_guess:
@@ -168,20 +172,34 @@ if st.session_state.get("challenge_active", False):
 
         if not st.session_state.challenge_revealed:
             if st.button("Submit Guess", type="primary", use_container_width=True):
-                g = "normal" if "Normal" in guess else "possible_abnormality"
+                g = "normal" if "Normal" in guess else "pneumonia"
                 record_guess(g)
                 st.rerun()
         else:
-            ai_label = case["label"].replace("_", " ").title()
+            ai_info = st.session_state.challenge_ai_prediction or {}
+            ai_pred = ai_info.get("prediction", "unknown")
+            ai_conf = ai_info.get("confidence", 0.0)
+            true_label = ai_info.get("true_label", "unknown")
+
+            user_correct = (
+                ("normal" if "Normal" in guess else "pneumonia") == true_label
+            )
+
+            st.markdown("---")
+            st.markdown("**🩺 True label:** " + true_label.upper())
             st.markdown(
-                '<div class="challenge-verdict">'
-                '<div class="challenge-verdict-title">🤖 SCANOVA AI Result</div>'
-                f'<div class="challenge-verdict-body">'
-                f'<strong>Prediction:</strong> {ai_label}<br>'
-                f'<strong>Explanation:</strong> {case["explanation"]}'
-                f'</div>'
-                '</div>',
-                unsafe_allow_html=True
+                f"**🤖 AI predicted:** {ai_pred.upper()} "
+                f"({ai_conf * 100:.1f}% confidence)"
+            )
+            st.markdown(
+                f"**{('✅' if user_correct else '❌')} Your answer:** "
+                f"{'Correct' if user_correct else 'Incorrect'}"
+            )
+
+            ai_correct = ai_pred == true_label
+            st.markdown(
+                f"**{('✅' if ai_correct else '❌')} AI answer:** "
+                f"{'Correct' if ai_correct else 'Incorrect'}"
             )
 
             if st.button("Next Round →", type="primary", use_container_width=True):
@@ -196,7 +214,9 @@ if st.session_state.get("challenge_active", False):
     st.stop()
 
 
-# ---------- Top Announcement Banner ----------
+# ==========================================================
+# TOP BANNER
+# ==========================================================
 _banner_html = (
     '<div class="top-banner">'
     '<div class="top-banner-content">'
@@ -265,7 +285,6 @@ hero_mri_tag = _img_tag(img_mri_b64, "Brain MRI")
 hero_bone_tag = _img_tag(img_bone_b64, "Bone X-ray")
 
 
-# ---- Brand block ----
 _brand_html = (
     '<div class="scanova-brand-block">'
     '<div class="scanova-brand-tag">SEE · ANALYZE · EXPLAIN</div>'
@@ -280,7 +299,6 @@ _brand_html = (
 st.markdown(_brand_html, unsafe_allow_html=True)
 
 
-# ---- 3-image hero grid ----
 _hero_grid_html = (
     '<div class="hero-modality-grid">'
 
@@ -335,7 +353,6 @@ _hero_grid_html = (
 st.markdown(_hero_grid_html, unsafe_allow_html=True)
 
 
-# ---- Three primary options ----
 _primary_opts_html = (
     '<div class="primary-options">'
     '<div class="primary-option xray">'
@@ -419,7 +436,7 @@ st.markdown(_flow_html, unsafe_allow_html=True)
 
 
 # ==========================================================
-# SIDEBAR SETTINGS
+# SIDEBAR
 # ==========================================================
 with st.sidebar:
     st.markdown("### ⚙️ Analysis Settings")
@@ -524,7 +541,9 @@ with st.sidebar:
     st.caption("Python • OpenCV • ONNX • Streamlit")
 
 
-# ---------- Disclaimer + Live Stats Row ----------
+# ==========================================================
+# DISCLAIMER + LIVE STATS ROW
+# ==========================================================
 col_left, col_right = st.columns([3, 1])
 
 with col_left:
@@ -557,7 +576,9 @@ with col_right:
     st.markdown(_live_card_html, unsafe_allow_html=True)
 
 
-# ---------- Upload Section ----------
+# ==========================================================
+# UPLOAD SECTION
+# ==========================================================
 _upload_header_html = (
     '<a id="upload"></a>'
     '<div class="section-header">'
@@ -569,7 +590,6 @@ _upload_header_html = (
 st.markdown(_upload_header_html, unsafe_allow_html=True)
 
 
-# ---------- Upload ----------
 if "uploaded_file" not in st.session_state:
     st.session_state.uploaded_file = None
 
@@ -617,11 +637,13 @@ if st.session_state.get("auto_analyze", False) and uploaded_file is not None:
     st.session_state.auto_analyze = False
 
 
-# ---------- Process ----------
+# ==========================================================
+# PROCESS
+# ==========================================================
 if uploaded_file is not None:
     st.success(f"✅ Loaded: **{uploaded_file.name}**")
 
-    # ===== PRE-SCAN QUALITY CHECK =====
+    # ---- Pre-scan quality check ----
     from backend.quality_check import check_image_quality
 
     if st.session_state.get("_cached_file_bytes") is None or \
@@ -676,7 +698,6 @@ if uploaded_file is not None:
     )
     st.markdown(_prescan_html, unsafe_allow_html=True)
 
-    # ----- Analyze -----
     if analyze_btn:
         start_time = time.time()
         current_mode = analysis_mode
@@ -907,7 +928,7 @@ if uploaded_file is not None:
 
         st.info(r["disclaimer"])
 
-        # ===== SCANOVA INSIGHT CARD =====
+        # ---------- SCANOVA Insight Card ----------
         try:
             _view = st.session_state.get("view_mode", "clinical")
             _regions_list = st.session_state.get("regions", []) or []
@@ -1010,7 +1031,7 @@ if uploaded_file is not None:
         except Exception:
             pass
 
-        # ===== Explainability Module =====
+        # ---------- Explainability Module ----------
         try:
             from backend.explainer import explain_reconstruction_error
             import numpy as _np
@@ -1073,7 +1094,7 @@ if uploaded_file is not None:
         except Exception:
             pass
 
-        # ===== View Mode: Patient / Clinical =====
+        # ---------- View Mode: Patient / Clinical ----------
         try:
             from backend.report import patient_explanation, clinical_explanation
             current_view = st.session_state.get("view_mode", "clinical")
@@ -1108,7 +1129,6 @@ if uploaded_file is not None:
         except Exception:
             pass
 
-        # ===== Result-level disclaimer =====
         _result_disc = (
             '<div class="result-disclaimer">'
             '<strong>Interpretation reminder:</strong> This is a preliminary '

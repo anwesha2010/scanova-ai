@@ -1,46 +1,31 @@
 """
 AI vs Human Challenge Mode
 ==========================
-Educational exhibition feature. Uses pre-loaded sample images
-and compares the user's guess with the AI's prediction.
+Real scoring: the AI's predictions are compared against true labels.
+No fake 5/5 scores. Honest exhibition.
+
+Uses images from test_data with known labels.
 """
 
+import os
+import cv2
+import numpy as np
 import streamlit as st
 
+from backend.dl_analyzer import predict_pneumonia
 
-# Sample cases — use existing project images
+
+# ---------- Challenge cases pulled from test_data ----------
 CHALLENGE_CASES = [
-    {
-        "id": 1,
-        "image_path": "assets/sample_xray.png",
-        "label": "possible_abnormality",
-        "explanation": "AI flagged 3 regions of interest in the lung fields.",
-    },
-    {
-        "id": 2,
-        "image_path": "branding/hero_xray.png",
-        "label": "normal",
-        "explanation": "AI found no significant regions. This image resembles typical training data.",
-    },
-    {
-        "id": 3,
-        "image_path": "branding/hero_mri.png",
-        "label": "normal",
-        "explanation": "AI detected no anomalies. Structure appears symmetric.",
-    },
-    {
-        "id": 4,
-        "image_path": "branding/hero_bone.png",
-        "label": "possible_abnormality",
-        "explanation": "AI flagged a density discontinuity near the joint region.",
-    },
-    {
-        "id": 5,
-        "image_path": "assets/sample_xray.png",
-        "label": "possible_abnormality",
-        "explanation": "AI flagged 2 regions. Please review carefully.",
-    },
+    {"source": "normal",    "index": 0},
+    {"source": "pneumonia", "index": 0},
+    {"source": "normal",    "index": 1},
+    {"source": "pneumonia", "index": 1},
+    {"source": "pneumonia", "index": 2},
 ]
+
+NORMAL_DIR = "test_data/normal"
+PNEUMONIA_DIR = "test_data/pneumonia"
 
 
 def init_challenge():
@@ -56,29 +41,77 @@ def init_challenge():
         st.session_state.challenge_finished = False
     if "challenge_revealed" not in st.session_state:
         st.session_state.challenge_revealed = False
+    if "challenge_ai_prediction" not in st.session_state:
+        st.session_state.challenge_ai_prediction = None
+
+
+def _load_case_image(case):
+    """Load a real image from test_data."""
+    if case["source"] == "normal":
+        folder = NORMAL_DIR
+        true_label = "normal"
+    else:
+        folder = PNEUMONIA_DIR
+        true_label = "pneumonia"
+
+    if not os.path.exists(folder):
+        return None, true_label
+
+    files = sorted(os.listdir(folder))
+    if case["index"] >= len(files):
+        return None, true_label
+
+    path = os.path.join(folder, files[case["index"]])
+    img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+    return img, true_label
 
 
 def get_current_case():
     idx = st.session_state.challenge_round % len(CHALLENGE_CASES)
-    return CHALLENGE_CASES[idx]
+    case = CHALLENGE_CASES[idx]
+    img, true_label = _load_case_image(case)
+    return {
+        "image": img,
+        "true_label": true_label,
+        "source": case["source"],
+        "index": case["index"],
+    }
 
 
-def record_guess(guess):
-    """Record user's guess and reveal AI's answer."""
+def record_guess(user_guess):
+    """Compare user guess AND AI prediction against true label."""
     case = get_current_case()
-    ai_guess = case["label"]
+    true_label = case["true_label"]
+    img = case["image"]
 
-    if guess == ai_guess:
+    if user_guess == true_label:
         st.session_state.challenge_score_user += 1
 
-    # AI always gets it right (ground truth)
-    st.session_state.challenge_score_ai += 1
+    ai_prediction = "unknown"
+    ai_confidence = 0.0
+
+    if img is not None:
+        try:
+            result = predict_pneumonia(img)
+            ai_prediction = result["prediction"]
+            ai_confidence = result["confidence"]
+            if ai_prediction == true_label:
+                st.session_state.challenge_score_ai += 1
+        except Exception:
+            pass
+
+    st.session_state.challenge_ai_prediction = {
+        "prediction": ai_prediction,
+        "confidence": ai_confidence,
+        "true_label": true_label,
+    }
     st.session_state.challenge_revealed = True
 
 
 def next_round():
     st.session_state.challenge_round += 1
     st.session_state.challenge_revealed = False
+    st.session_state.challenge_ai_prediction = None
 
     if st.session_state.challenge_round >= 5:
         st.session_state.challenge_finished = True
@@ -90,6 +123,7 @@ def reset_challenge():
     st.session_state.challenge_score_ai = 0
     st.session_state.challenge_finished = False
     st.session_state.challenge_revealed = False
+    st.session_state.challenge_ai_prediction = None
 
 
 def exit_challenge():
