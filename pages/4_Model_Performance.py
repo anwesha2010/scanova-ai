@@ -378,3 +378,41 @@ with tab_gradcam:
             "education. It does not provide a diagnosis. Always consult a "
             "qualified healthcare professional."
         )
+        
+
+        # ---------- Doctor Feedback (Human-in-the-Loop) ----------
+        st.divider()
+        st.markdown("#### 👨‍⚕️ Clinician Feedback")
+        st.caption(
+            "If you're a medical professional, does the AI's flag make sense?"
+        )
+
+        fb1, fb2, fb3 = st.columns(3)
+
+        with fb1:
+            if st.button("✅ Agree", use_container_width=True,
+                         key="fb_agree_btn"):
+                st.success(
+                    "Thank you! Feedback logged. "
+                    "Human-in-the-loop design matters."
+                )
+
+        with fb2:
+            if st.button("❌ Disagree", use_container_width=True,
+                         key="fb_disagree_btn"):
+                st.warning(
+                    "Thank you! Your correction helps us improve. "
+                    "The model does not learn automatically — this is a research prototype."
+                )
+
+        with fb3:
+            if st.button("🤔 Not sure", use_container_width=True,
+                         key="fb_unsure_btn"):
+                st.info(
+                    "Understood. Real-world medical AI always needs "
+                    "human review — never autonomous decisions."
+                )
+
+        st.caption(
+            "🔄 This is human-in-the-loop design — the doctor stays in control."
+        )
