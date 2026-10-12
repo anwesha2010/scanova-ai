@@ -733,12 +733,27 @@ if uploaded_file is not None:
             if DL_AVAILABLE and ("Deep Learning" in current_mode or "Compare" in current_mode):
                 dl_start = time.time()
                 anomaly_map_dl = detect_anomalies_dl(enhanced, modality=selected_modality)
+
+                # Handle new dict return from detect_anomalies_dl
+                if isinstance(anomaly_map_dl, dict):
+                    if anomaly_map_dl.get("unsure"):
+                        st.warning(
+                            "🤔 **Modality unclear.** The classifier wasn't confident "
+                            "enough to pick a model. Please select the scan type manually "
+                            "in the sidebar and re-analyze."
+                        )
+                        anomaly_map_dl = None
+                    elif anomaly_map_dl.get("error"):
+                        st.error(f"⚠️ {anomaly_map_dl['error']}")
+                        anomaly_map_dl = None
+
                 if anomaly_map_dl is not None:
                     regions_dl = find_anomaly_regions(anomaly_map_dl, threshold=sensitivity)
                     heat_dl, overlay_dl = generate_heatmap(original, anomaly_map_dl)
                     if show_boxes:
                         overlay_dl = draw_boxes(overlay_dl, regions_dl)
                     report_dl = generate_report(anomaly_map_dl, regions_dl, threshold=sensitivity)
+
                 dl_time = time.time() - dl_start
 
             if "Compare" in current_mode and anomaly_map_dl is not None:

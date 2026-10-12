@@ -42,10 +42,10 @@ def _load_session(name):
 
 
 # ---------- Public API ----------
-def predict_modality(image):
+def predict_modality(image, confidence_threshold=0.70):
     """
-    Predict which modality an image belongs to.
-    Returns: (modality_name, confidence_dict)
+    Predict modality with confidence threshold.
+    Returns ("unsure", ...) if the model isn't confident enough.
     """
     sess = _load_session("classifier")
     if sess is None:
@@ -59,21 +59,40 @@ def predict_modality(image):
     probs = exp / exp.sum()
 
     idx = int(np.argmax(probs))
+    top_confidence = float(probs[idx])
+
+    # Confidence check — return "unsure" if too low
+    if top_confidence < confidence_threshold:
+        return "unsure", {
+            CLASS_NAMES[i]: float(probs[i]) for i in range(4)
+        }
+
     modality = CLASS_NAMES[idx]
     confidence = {CLASS_NAMES[i]: float(probs[i]) for i in range(4)}
     return modality, confidence
-
 
 def detect_anomalies_dl(image, modality=None, block_size=32, **kwargs):
     """
     Multi-modal deep learning anomaly detection via reconstruction error.
     """
+    confidence_info = None
+
     if modality is None or modality == "auto":
-        modality, _ = predict_modality(image)
+        modality, confidence_info = predict_modality(image)
+
+    # If the classifier isn't confident, don't guess — flag it
+    if modality == "unsure":
+        return {
+            "unsure": True,
+            "confidence_info": confidence_info,
+        }
 
     sess = _load_session(modality)
     if sess is None:
-        return np.zeros_like(image, dtype=np.float32)
+        return {
+            "unsure": False,
+            "error": f"Model for {modality} not loaded",
+        }
 
     img_128 = _to_128(image)
     inp = img_128.reshape(1, 1, 128, 128).astype(np.float32)
