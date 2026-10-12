@@ -279,6 +279,46 @@ with tab_gradcam:
             st.markdown(
                 f"- Pneumonia: `{prediction_result['probabilities']['pneumonia']:.3f}`"
             )
+            
+            # ---------- Triage Priority Card ----------
+            pneumonia_prob = prediction_result['probabilities']['pneumonia']
+
+            if pneumonia_prob >= 0.75:
+                triage_level = "🔴 URGENT"
+                triage_desc = "High probability — prioritize for immediate review."
+                triage_color = "#dc2626"
+            elif pneumonia_prob >= 0.50:
+                triage_level = "🟠 REVIEW SOON"
+                triage_desc = "Moderate probability — queue for review within hours."
+                triage_color = "#ea580c"
+            else:
+                triage_level = "🟢 ROUTINE"
+                triage_desc = "Low probability — standard queue."
+                triage_color = "#16a34a"
+
+            st.markdown(f"""
+            <div style="border-left: 5px solid {triage_color};
+                        background: #f8fafc;
+                        border-radius: 10px;
+                        padding: 1rem 1.25rem;
+                        margin-top: 1rem;">
+                <div style="font-family: 'JetBrains Mono', monospace;
+                            font-size: 0.65rem; font-weight: 700;
+                            letter-spacing: 0.15em;
+                            color: {triage_color};
+                            text-transform: uppercase;
+                            margin-bottom: 0.3rem;">
+                    Triage Priority
+                </div>
+                <div style="font-size: 1.3rem; font-weight: 800;
+                            color: {triage_color}; margin-bottom: 0.3rem;">
+                    {triage_level}
+                </div>
+                <div style="font-size: 0.9rem; color: #475569;">
+                    {triage_desc}
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
 
         with col_b:
             st.markdown("#### 🔥 Grad-CAM Overlay")
