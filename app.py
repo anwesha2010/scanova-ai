@@ -521,6 +521,40 @@ with st.sidebar:
         st.session_state.challenge_active = True
         reset_challenge()
         st.rerun()
+    
+    st.divider()
+
+    # ---------- Shareable Demo QR Card ----------
+    @st.cache_data(show_spinner=False)
+    def _generate_share_qr():
+        try:
+            import qrcode
+            qr = qrcode.QRCode(version=1, box_size=6, border=1)
+            qr.add_data("https://scanova-ai.streamlit.app")
+            qr.make(fit=True)
+            img = qr.make_image(fill_color="black", back_color="white")
+            buf = io.BytesIO()
+            img.save(buf, format="PNG")
+            buf.seek(0)
+            return buf.getvalue()
+        except Exception:
+            return None
+
+    _qr_bytes = _generate_share_qr()
+    if _qr_bytes is not None:
+        st.markdown(
+            '<div style="text-align: center; margin-top: 0.5rem;">'
+            '<div style="font-family: \'JetBrains Mono\', monospace; '
+            'font-size: 0.65rem; font-weight: 700; '
+            'letter-spacing: 0.15em; color: #0369a1; '
+            'text-transform: uppercase; margin-bottom: 0.4rem;">'
+            '📱 Share this demo'
+            '</div>'
+            '</div>',
+            unsafe_allow_html=True
+        )
+        st.image(_qr_bytes, use_container_width=True)
+        st.caption("Scan to open on any phone")
 
     st.divider()
     st.markdown("### 📊 Session Stats")
