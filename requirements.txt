@@ -8,4 +8,4 @@
 8   onnxruntime
 9   pydicom
 10  scikit-learn
-11  qrcode[pil]
+11  qrcode
