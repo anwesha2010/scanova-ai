@@ -101,20 +101,46 @@ def generate_pdf_report(report, overlay_img):
         Paragraph("Medical Image Analysis Report", subtitle_style),
     ]
 
-    header_table = Table(
-        [[logo_flowable, title_block]],
-        colWidths=[1.7 * inch, 4.6 * inch],
-        rowHeights=[0.7 * inch]
-    )
-    header_table.setStyle(TableStyle([
+    # ---------- QR Code (top-right corner) ----------
+    qr_flowable = None
+    try:
+        import qrcode
+        qr = qrcode.QRCode(version=1, box_size=8, border=1)
+        qr.add_data("https://scanova-ai.streamlit.app")
+        qr.make(fit=True)
+        qr_img = qr.make_image(fill_color="black", back_color="white")
+
+        qr_buffer = io.BytesIO()
+        qr_img.save(qr_buffer, format="PNG")
+        qr_buffer.seek(0)
+
+        qr_flowable = RLImage(qr_buffer, width=0.7 * inch, height=0.7 * inch)
+    except Exception as e:
+        print("[PDF] QR code failed:", e)
+
+    if qr_flowable is not None:
+        header_table = Table(
+            [[logo_flowable, title_block, qr_flowable]],
+            colWidths=[1.5 * inch, 4.2 * inch, 0.9 * inch],
+            rowHeights=[0.8 * inch]
+        )
+    else:
+        header_table = Table(
+            [[logo_flowable, title_block]],
+            colWidths=[1.5 * inch, 5.1 * inch],
+            rowHeights=[0.8 * inch]
+        )
+
+        header_table.setStyle(TableStyle([
         ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('ALIGN', (-1, 0), (-1, 0), 'RIGHT'),
         ('LEFTPADDING', (0, 0), (-1, -1), 0),
         ('RIGHTPADDING', (0, 0), (-1, -1), 0),
         ('TOPPADDING', (0, 0), (-1, -1), 0),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 0),
     ]))
     story.append(header_table)
-
+    
     # Divider line
     story.append(Spacer(1, 0.08 * inch))
     story.append(Table(
@@ -244,7 +270,8 @@ def generate_pdf_report(report, overlay_img):
         "SCANOVA AI · scanova-ai.streamlit.app · MIT Licensed",
         footer_style
     ))
-
+    
+       
     doc.build(story)
     buffer.seek(0)
     return buffer.getvalue()
