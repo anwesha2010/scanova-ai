@@ -1,11 +1,11 @@
-1   streamlit
-2   opencv-python-headless
-3   pillow
-4   numpy
-5   matplotlib
-6   reportlab
-7   streamlit-extras
-8   onnxruntime
-9   pydicom
-10  scikit-learn
-11  qrcode
+streamlit
+opencv-python-headless
+pillow
+numpy
+matplotlib
+reportlab
+streamlit-extras
+onnxruntime
+pydicom
+scikit-learn
+qrcode
