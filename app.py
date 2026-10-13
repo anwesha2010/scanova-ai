@@ -70,10 +70,8 @@ try:
     render_judge_banner()
     render_judge_controls()
     render_judge_summary_card()
-except Exception as e:
-    st.error(f"Judge mode error: {type(e).__name__}: {e}")
-    import traceback
-    st.code(traceback.format_exc())
+except Exception:
+    pass
 
 
 # ==========================================================
@@ -525,7 +523,7 @@ with st.sidebar:
         st.session_state.challenge_active = True
         reset_challenge()
         st.rerun()
-    
+
     st.divider()
 
     # ---------- Shareable Demo QR Card ----------
@@ -1167,6 +1165,63 @@ if uploaded_file is not None:
                     '</div>'
                     '</div>'
                 )
+                st.markdown(_explanation_view_html, unsafe_allow_html=True)
+
+                # ---------- Patient-Friendly Summary Card ----------
+                _pr = st.session_state.get("report", {}) or {}
+                _regions_n = _pr.get("regions_found", 0)
+                _level = _pr.get("level", "safe")
+
+                if _level == "danger":
+                    _status_emoji = "🔴"
+                    _status_label = "REVIEW RECOMMENDED"
+                    _status_color = "#dc2626"
+                    _status_bg = "linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%)"
+                    _headline = "The AI flagged some regions that may need a closer look."
+                    _next_step = "Please share this report with your doctor for review."
+                elif _level == "warning":
+                    _status_emoji = "🟠"
+                    _status_label = "MONITOR"
+                    _status_color = "#ea580c"
+                    _status_bg = "linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%)"
+                    _headline = "The AI noticed a few small areas of interest."
+                    _next_step = "Consider showing this to a doctor, especially if you have symptoms."
+                else:
+                    _status_emoji = "🟢"
+                    _status_label = "LOOKS NORMAL"
+                    _status_color = "#16a34a"
+                    _status_bg = "linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)"
+                    _headline = "The AI did not find any unusual regions."
+                    _next_step = "Routine follow-up if you have symptoms or concerns."
+
+                if _regions_n == 0:
+                    _detail = "The scan looks consistent with the normal training data."
+                elif _regions_n == 1:
+                    _detail = "1 area of interest was flagged for review."
+                else:
+                    _detail = f"{_regions_n} areas of interest were flagged for review."
+
+                _patient_card = f"""
+<div style="background: {_status_bg}; border-radius: 16px; padding: 2rem 2.25rem; border-left: 6px solid {_status_color}; max-width: 820px; margin: 1.5rem auto; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;">
+<div style="font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.2em; color: {_status_color}; text-transform: uppercase; margin-bottom: 0.75rem;">Your Scan Summary</div>
+<div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem;">
+<div style="font-size: 3rem; line-height: 1;">{_status_emoji}</div>
+<div>
+<div style="font-size: 1.6rem; font-weight: 800; color: {_status_color}; letter-spacing: -0.01em;">{_status_label}</div>
+<div style="font-size: 0.95rem; color: #475569; margin-top: 0.2rem;">{_detail}</div>
+</div>
+</div>
+<div style="font-size: 1.05rem; color: #1e293b; line-height: 1.6; margin-bottom: 1.25rem;">{_headline}</div>
+<div style="background: white; border-radius: 12px; padding: 1rem 1.25rem; border: 1px solid #e2e8f0;">
+<div style="font-size: 0.7rem; font-weight: 700; color: #64748b; letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.4rem;">What to do next</div>
+<div style="font-size: 0.95rem; color: #334155; line-height: 1.55;">{_next_step}</div>
+</div>
+<div style="margin-top: 1.25rem; font-size: 0.82rem; color: #64748b; line-height: 1.5; text-align: center;"><strong>Important:</strong> SCANOVA is an AI tool, not a doctor. It cannot diagnose or rule out any condition. Always speak with a qualified healthcare professional about your health.</div>
+</div>
+"""
+
+                st.html(_patient_card)
+
             else:
                 _explanation_view_html = (
                     '<div class="explanation-clinical">'
@@ -1178,7 +1233,7 @@ if uploaded_file is not None:
                     '</div>'
                     '</div>'
                 )
-            st.markdown(_explanation_view_html, unsafe_allow_html=True)
+                st.markdown(_explanation_view_html, unsafe_allow_html=True)
         except Exception:
             pass
 
