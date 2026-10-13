@@ -64,12 +64,16 @@ try:
         init_judge_mode,
         render_judge_banner,
         render_judge_controls,
+        render_judge_summary_card,
     )
     init_judge_mode()
     render_judge_banner()
     render_judge_controls()
-except Exception:
-    pass
+    render_judge_summary_card()
+except Exception as e:
+    st.error(f"Judge mode error: {type(e).__name__}: {e}")
+    import traceback
+    st.code(traceback.format_exc())
 
 
 # ==========================================================
