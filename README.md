@@ -148,7 +148,7 @@ We're honest about what this tool does **not** do:
 
 ## 🎓 About This Project
 
-Built by **Anwesha Rout** and the **SCANOVA Team** for **InnoEx 2026**.
+Built by **Anwesha Rout** and  **Binnisha Minocha** for **InnoEx 2026**.
 
 **Mission:** Demonstrate how AI can assist — not replace — medical professionals.
 
