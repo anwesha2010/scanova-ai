@@ -1352,7 +1352,7 @@ _founder_html = (
     '"We built SCANOVA because we watched radiologists drown in '
     'hundreds of scans a day. AI shouldn\'t replace them — it should '
     'give them back the time to think."'
-    '<span class="attr">— <strong>Anwesha Rout</strong>, Founder · SCANOVA AI</span>'
+    '<span class="attr">— <strong>Anwesha Rout and Binnisha Minnocha</strong>, Founders · SCANOVA AI</span>'
     '</div>'
 )
 st.markdown(_founder_html, unsafe_allow_html=True)
