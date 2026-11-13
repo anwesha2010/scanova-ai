@@ -182,7 +182,7 @@ st.markdown("""
 # ---------- SIGNATURE ----------
 st.markdown("""
     <div class="story-sign">
-        — Anwesha
+        — Anwesha Rout & Binnisha Minocha
         <small>FOUNDER · SCANOVA AI · 2026</small>
     </div>
 """, unsafe_allow_html=True)
